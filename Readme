@@ -1,0 +1,19 @@
+Files related to Making 3D models with SolidPython & OpenSCAD
+
+This repository contains files like the following:
+
+exec-on-change --- Shell script that uses inotifywait to detect when
+  a program changes; to automatically run a SolidPython program each
+  time you save the program.
+
+jgenArg.py --- Module to simplify fetching program argument values
+  with defaults.  Used by gen-flanged-tube
+  
+gen-flanged-tube3.py --- SolidPython program to generate a flanged and
+  threaded tube-connector, and a threaded ring to hold the connector
+  in place when bulkhead mounted.  Illustrates making mating threads
+  with multiple thread starts.
+
+gen-channel-asm2.py --- SolidPython program to generate channels and
+  rails that can be assembled to make dispensers for reel-supplied SMD
+  parts
