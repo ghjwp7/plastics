@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
 # jiw 26 Dec 2018 - Using SolidPython to gen OpenSCAD code for parts
-# to connect a drain hose to tile saw tray
+# to connect a drain hose to tile saw tray.
+
+# Optional params for __main__:
+#    makeConn, makeRing, holeDiam, scaleFactor
+#    These default to 1, 1, 1.33, 25.4 respectively.
 
 # When modifying this code:
 # (a) At outset (ie once only), at command prompt say:
@@ -51,14 +55,12 @@ def threadAsm(uplift, thredID, thredThik, pitch, starts, turns, extern):
         thred += rotate(a=(0, 0, (t*360)/starts))(thred1)
     # Return thread moved up to proper position
     return up(uplift)(thred)
-
-def letter(c, tall, thick):     # Generate letter c at specified size
-    bar, 
-    specs = { 'J': [(), (), ()] }
     
 if __name__ == '__main__':
     from jgenArg import genArg
-    args = genArg([1.33, 25.4, 99])
+    args = genArg([1, 1, 1.33, 25.4])
+    makeConn = args.next()      # Generate connector if non-zero
+    makeRing = args.next()      # Generate outer ring if non-zero
     hd = args.next()            # Hole diameter to fit
     sf = args.next()            # Scale factor
     
@@ -91,9 +93,9 @@ if __name__ == '__main__':
     botThred = threadAsm(0, diam2, thredThik, pitch, 3, turns, False)
         
     # Assemble items and apply scale factor
-    asm = cylinder(d1=.75, d2=.5, h=.124)
-    if 0: asm += left(moveTop)(topThred+topAsm)
-    if 1: asm += botAsm + botThred
+    asm, bot, top = None,  botAsm + botThred,  topThred+topAsm
+    if makeConn: asm = left(moveTop)(top)
+    if makeRing: asm = asm + bot if asm else bot
     asm = scale((sf, sf, sf))(asm)
     cylSegments, version = 60, 3
     cylSet_fn = '$fn = {};'.format(cylSegments)
