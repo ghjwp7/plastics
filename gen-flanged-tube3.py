@@ -1,8 +1,18 @@
 #!/usr/bin/env python
 
-# jiw 26 Dec 2018 - Using SolidPython to gen OpenSCAD code for parts
-# to connect a drain hose to tile saw tray.
+# jiw 26 Dec 2018
+'''Use SolidPython to generate OpenSCAD code for parts to connect a
+drain hose to a tile saw tray.  More generally, make a threaded
+bulkhead-mounting hose connector.
 
+thredSlop (in __main__) controls looseness-of-fit between mating
+threads.  Larger values make a looser, sloppier fit.  Smaller values
+make tighter fits.  If the fit is too tight, the outer ring won't fit
+over the inner.  On my Omni (a Prusa-style 3D printer) using CraftWare
+slicing with 0.03 mm layers, thredSlop of 0.03" (and other values
+defaulted) is too small for the ring to fit on, while 0.05" slop works
+ok with 0.02 mm layers.
+'''
 # Optional params for __main__:
 #    makeConn, makeRing, holeDiam, scaleFactor
 #    These default to 1, 1, 1.33, 25.4 respectively.
@@ -11,7 +21,7 @@
 # (a) At outset (ie once only), at command prompt say:
 #           V=3;  SCF=flanged-tube$V.scad;  PYF=gen-${SCF%.scad}.py
 #           STF=${SCF%.scad}.stl; exec-on-change $PYF "python $PYF" &
-#           openscad $SCF &
+#           echo $PYF, $SCF, $STF;  openscad $SCF &
 #     [To avoid a 'Text file busy' shell error message, instead of
 #      just saying  ./$PYF  the commands above use python to run $PYF]
 # (b) After changes that you want to see the effect of, save the
@@ -27,7 +37,16 @@ from solid.screw_thread import thread, default_thread_section
 from solid.utils import down, up, left
 
 def cylinderAsm(dii, doo, hss):
-    # Get inner and outer start and end diameters, and s & e heights 
+    '''Produce an assembly of specified cylinders, given three lists that
+       specify sequences of inner diameters, outer diameters, and
+       heights.  Consecutive triples (of diameters and height) specify
+       the ends of a cylindrical or conical portion of an assembly, in
+       ascending order of heights; except if the next height in
+       sequence isn't more than the current height, there is no output
+       for that pair of triples.
+    '''
+    # Get inner and outer start and end diameters, and s & e heights
+    asm = None
     for jointNum, dis, die, dos, doe, hs, he in zip(range(len(dii)), dii, dii[1:], doo, doo[1:], hss, hss[1:]):
         if hs >= he: # Skip rings that don't have positive thickness
             continue
@@ -35,13 +54,21 @@ def cylinderAsm(dii, doo, hss):
         co = cylinder(d1=dos, d2=doe, h=he-hs)
         ci = cylinder(d1=dis, d2=die, h=he-hs+0.002)
         cyl = part()(co - hole()(down(0.001)(ci)))
-        if jointNum:
-            asm += up(hs)(cyl)
-        else:
-            asm = cyl
+        asm = asm + up(hs)(cyl) if asm else cyl
     return asm
 
 def threadAsm(uplift, thredID, thredThik, pitch, starts, turns, extern):
+    '''Return an assembly for an internal or external thread of given
+       inner diameter, thickness, and pitch, with specified number of
+       starts (independent thread parts), wrapping a given number of
+       turns.  uplift = Z-axis translation amount.  Inner diameter
+       thredID is the diameter of the cylinder the threads wrap
+       against.  It is that cylinder's outer diameter for external
+       threads, or the cylinder's inner diameter for internal threads.
+       threadAsm adds or subtracts an epsilon (0.0001) to prevent
+       small gaps between thread and cylinder, which if they happen
+       will lead to rendering/slicing error messages.
+    '''
     inRadi, eps, thredSpan = thredID/2, 1e-4, pitch*turns
     # Set tooth_height and tooth_depth in thread-shape
     thredShape = default_thread_section((pitch/starts)-eps, thredThik)
@@ -58,25 +85,31 @@ def threadAsm(uplift, thredID, thredThik, pitch, starts, turns, extern):
     
 if __name__ == '__main__':
     from jgenArg import genArg
-    args = genArg([1, 1, 1.33, 25.4])
+    args = genArg([1, 0, 1.33, 25.4])
     makeConn = args.next()      # Generate connector if non-zero
     makeRing = args.next()      # Generate outer ring if non-zero
     hd = args.next()            # Hole diameter to fit
     sf = args.next()            # Scale factor
+
+    # Set thread pitch
+    pitch = .375                # Inches of rise per full revolution
     
-    # Set thread outer diameter, thread tooth depth, and number of turns
-    thredOD, thredThik, turns = 1.33, 0.05, 0.8
-    # base thickness, thread high/low, and thread inner diameter
-    bThk, thredHi, thredLo, thredID = 0.07, 0.5, 0.2, thredOD-2*thredThik
-    pitch = (thredHi-thredLo)/turns
+    # Set thread outer diameter, thread tooth depth, and flange base thickess
+    thredOD, thredThik, baseThik = 1.33, 0.05, 0.07
+    # thread high z, low z, and its inner diameter
+    thredHi, thredLo, thredID =0.66, 0.2, thredOD-2*thredThik
+    turns = (thredHi-thredLo)/pitch
     topThred = threadAsm(thredLo, thredID, thredThik, pitch, 3, turns, True)
     
     # Top piece: Specify inner and outer diameters, plus heights
     diam1 = thredID
     diam2 = diam1 - 0.11     # diam2 is diam1 minus 2 wall thicknesses
-    dii = [0.38, 0.38, 0.38, 0.38, diam2, diam2]
-    doo = [1.70, 1.70, 0.50, 0.50, diam1, diam1]
-    hss = [0.00, bThk, bThk, 0.60, bThk,  thredHi]
+    cdiam1, cdiam2, cHi = .6, .5, baseThik+.25
+    ddiam1, ddiam2 = cdiam1+0.07, cdiam2+0.07
+    #      ...flange.....    ....center....     ...outer tube...
+    dii = [cdiam1, cdiam1,   cdiam1, cdiam2,    diam2,    diam2]
+    doo = [1.70,   1.70,     ddiam1, ddiam2,    diam1,    diam1]
+    hss = [0.00, baseThik,   baseThik,  cHi,   baseThik,  thredHi]
     topAsm = cylinderAsm(dii, doo, hss) # Make assembly-of-cylinders
 
     # Bottom piece: Specify inner and outer diameters, plus heights

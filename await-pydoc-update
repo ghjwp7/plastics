@@ -1,0 +1,45 @@
+#!/bin/sh
+# await-pydoc-update -- jiw -- 10 Feb 2019
+
+# Start a process that runs pydoc and refreshes browser page, each
+# time a selected python file changes.  That is, automate running
+# pydoc and updating a corresponding browser page, upon each change of
+# a given python file.  Use ctrl-C to exit this script.  Note, install
+# xdotool, eg via sudo apt-get install xdotool, and inotifywait, eg
+# via sudo apt-get install inotify-tools, if not already on hand.
+
+# Optional parameters:  pyFile and WindowID
+
+# If parameter pyFile is given, use its basename as the file to watch
+# for changes.  If no parameter is given, find the latest python file
+# in working directory and use that.
+
+# If parameter WindowID is given, use it as the id of the browser
+# window to refresh, rather than using the id calculated by the
+# command, WindowID=$(xdotool search "module $pyFile") .  Note, you
+# can get a window id manually.  Enter command xdotool selectwindow
+# then click on desired window.
+
+# When watched file XYZ.py changes, run basically the following:
+#       pydoc -w XYZ; xdotool windowactivate $WindowID key ctrl+F5
+# which sends a ctrl-F5 to specified window after running pydoc.
+
+if [ $# -gt 0 ]
+then pyFile=$1
+else pyFile=$(ls -t *.py |  head -1)
+fi
+pyFile=`basename $pyFile .py`
+   
+if [ $# -gt 1 ]
+then WindowID=$2
+else WindowID=$(xdotool search "module $pyFile")
+fi
+
+echo pyFile is $pyFile and WindowID is $WindowID ... Awaiting changes ... 
+
+# Result of inotifywait is put in S so it doesn't echo
+while  S=$(inotifywait -eMODIFY ${pyFile}.py  2>/dev/null)
+do
+    echo Updating at $(date) ... $(pydoc -w $pyFile)
+    xdotool windowactivate $WindowID key ctrl+F5
+done
