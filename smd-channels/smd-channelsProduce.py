@@ -4,11 +4,12 @@
 # SMD-tape channels, for pick-and-place operations -- with specs
 # picked up from QtTableWidget application
 
+from math import sqrt
 from PyQt5.QtCore import Qt
 from solid import color, cube, cylinder, rotate
 from solid import hole, part, scad_render_to_file, scale, translate
-from solid.screw_thread import thread, default_thread_section
-from solid.utils import up, down, left, right, forward, back, Cyan, Green, Red
+from solid.utils import up, down, left, right, forward, back
+from solid.utils import Cyan, Green, Red, Magenta
 from ChannelVars import Table1, Table2, Table3 # tape-types, rail-specs, units-to-do
 from ChannelCallbacks import CallData
 from loadTablesForXML import loadAndShow
@@ -65,6 +66,8 @@ class TapeData:                 # Specs for one tape-type
                 self.high = trow.getHigh()
                 self.oh1  = trow.getOh1()
                 self.oho  = trow.getOho()
+                self.oh1a  = trow.getOh1a()
+                self.ohoa  = trow.getOhoa()
                 self.tapeOk = True
                 return
 #--------------------------------------------------
@@ -134,6 +137,19 @@ def makeTube(idi, odi, hi, transl, half, eps):
         tube -= translate([dx, -(eps+odi)/2,0])(block)
     return translate(transl)(tube)
 #--------------------------------------------------
+def rampBar(leng, wide, high, transl):
+    s2 = sqrt(2)
+    cu = cube([leng, wide, high])
+    box = rotate(a=[0,-45,0])(back(wide)((cube([s2*high, 3*wide, s2*high]))))
+    return translate(transl)(cu-box-right(leng)(box))
+#--------------------------------------------------
+def rampSide(leng, wide, high, transl, rotat):
+    # x-axis rotate below exchanges hi, wide - next two lines compensate.
+    tcorr = [0,0,-wide] if rotat>0 else [0,-high,0]
+    s = rotate([rotat,0,0])(rampBar(leng, high, wide, tcorr))
+    return translate(transl)(s)
+    #return s
+#--------------------------------------------------
 def makeLegs(rail, tapeA, tapeB, maxHi): 
     '''Make legs based on specs in params - overall x size from rail, y
     overhang sizes from tapeA & B, z heights from maxHi and from tapeA
@@ -156,14 +172,6 @@ def makeLegs(rail, tapeA, tapeB, maxHi):
     overEnd = 2*PadLen + LegSepO
     LegLen  = CapLen - overEnd
     
-    def channelBar(leng, wide, hi, transl):
-        cu = cube([leng, wide, hi])
-        m = 2*max(wide, maxHi)
-        box = translate([0, -m/3, m/2])(rotate(a=[0,45,0])(cube([m,m,m])))
-        l = right(leng-m/2)(box)
-        r = left(0.8*m)(box)        
-        return translate(transl)(cu-r-l)
-        #return translate(transl)(r+l)
     def cappedCube(leng, wide, hi, transl):
         cu = cube([leng, wide, hi])
         ci = forward(wide/2)(cylinder(d=wide, h=hi))
@@ -171,11 +179,15 @@ def makeLegs(rail, tapeA, tapeB, maxHi):
    
     barx  = (CapLen-LegLen-LegSepO)/2
     barz  = CapThik-eps*1.1
-    chanA = channelBar(LegLen+LegSepO, tapeA.oho, maxHi-tapeA.high+eps, [barx, 0, barz])
-    chanB = channelBar(LegLen+LegSepO, tapeB.oh1, maxHi-tapeB.high+eps, [barx, CapWide-tapeB.oh1, barz])
+    chanA = rampBar(LegLen+LegSepO, tapeA.oho, maxHi-tapeA.high+eps, [barx, 0, barz])
+    chanB = rampBar(LegLen+LegSepO, tapeB.oh1, maxHi-tapeB.high+eps, [barx, CapWide-tapeB.oh1, barz])
     legOut  = cappedCube(LegLen, LegSepO, maxHi+eps,   [overEnd/2, tapeA.oho,         CapThik-eps/2])
     legIn   = cappedCube(LegLen, LegSepI, maxHi+2*eps, [overEnd/2, tapeA.oho+LegThik, CapThik-eps/2])
-    return legOut-legIn+chanA+chanB
+
+    cutLen = CapLen - 2*EndLen
+    testrs = rampSide(cutLen, tapeA.oho-tapeA.ohoa+eps, maxHi+CapThik+eps, [EndLen, tapeA.ohoa-eps/2, -eps/2], -90)
+    testls = rampSide(cutLen, tapeB.oh1-tapeB.oh1a+eps, maxHi+CapThik+eps, [EndLen, CapWide+tapeB.oh1a-tapeB.oh1-eps/2, -eps/2], 90)
+    return color(Green)(legOut-legIn+chanA+chanB), color(Red)(testrs)+color(Magenta)(testls)
 #--------------------------------------------------
 def makeUnit(rail, tapeA, tapeB, maxHi):
     '''Make a unit based on rail length-and-width specs in rail, and tape
@@ -187,8 +199,8 @@ def makeUnit(rail, tapeA, tapeB, maxHi):
     CapThik = rail.CapThik
     PostStep   = (CapLen-2*rail.PostOffset)/max(1,rail.nPosts-1)
     cap = cube([CapLen, CapWide, CapThik])
-    legs = makeLegs(rail, tapeA, tapeB, maxHi)
-    asm = cap + color(Green)(legs)
+    legs, cutout = makeLegs(rail, tapeA, tapeB, maxHi)
+    asm = cap + legs - cutout
     px = rail.PostOffset
     for pn in range(rail.nPosts):          # Add set of posts
         asm += makeTube(rail.PostID, rail.PostOD, maxHi, [px, rail.CapWide/2, 0], 0, rail.eps)
