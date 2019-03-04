@@ -6,7 +6,7 @@ gen-channel-asm2.py --- SolidPython program to generate channels and
 
 smd-channelsProduce system --- Source code for this Qt menu, XML data
 storage, and SolidPython 3D modeling program appears in five .py
-files:, ChannelCallbacks.py, ChannelVars.py, loadTablesForXML.py,
+files: ChannelCallbacks.py, ChannelVars.py, loadTablesForXML.py,
 make-xml-accessors.py, and smd-channelsProduce.py, described below.
 The system architecture allows supporting applications other than SMD
 channel production by complete replacement of main program
@@ -47,5 +47,5 @@ make-xml-accessors.py -- don't edit it directly.
 
 make-xml-accessors.py --- Reads .xml file and writes out program
 ChannelVars.py with a class of accessors for each table.
-App-dependent, except for default file names in main
+App-independent, except for default file names in main
 
