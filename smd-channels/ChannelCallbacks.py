@@ -16,9 +16,13 @@ class CallData:
     A producer receives form data and outputs produced results.  For
     example, calcVols receives mains data, and outputs computed
     volumes to display.
+
+    This class is more of a namespace than an object design -- all of
+    its methods so far are marked @classmethod or @staticmethod.
     '''
-    def __init__():
+    def __init__(self):
         pass
+    autoProduce = False
     @classmethod
     def setProducers(c, producer_list):
         c.producer_funcs = producer_list
@@ -30,7 +34,7 @@ class CallData:
     def produceOutput(c, mains): return c.producer_funcs[1](mains)
     
     @staticmethod
-    def buttonLabels():      return ['Quit', 'Save', 'Produce'] #, 'Load'
+    def buttonLabels():      return ['Quit', 'Save', 'Produce', 'AutoProd'] #, 'Load'
     @staticmethod
     def tableNames():        return ['tapetypes', 'railspecs', 'unitlist', 'instructions']
     
@@ -71,6 +75,8 @@ class CallData:
         # Don't re-calc when calcVols changes Vol entries
         if tab.tabCue != 'makes' or co != Table3.colVolRO():
             c.calcVols(mains)
+            if c.autoProduce:
+                c.produceOutput(mains)
     #---------------------------------------------
     @classmethod
     def on_Selects(c, mains, tabN):
@@ -81,7 +87,7 @@ class CallData:
         Params: mains = Top level of display structure
         tabN = id-character of table in which selection changed
         '''
-        pass
+        pass            
     #---------------------------------------------
     @staticmethod
     def saveXML(etree, mains):
@@ -119,9 +125,10 @@ class CallData:
         bun = button number of button that was clicked
         '''
         bt = c.buttonLabels()[bun]
-        if bt=='Quit': sys.exit()
-        elif bt=='Produce': c.produceOutput(mains)
-        elif bt=='Save': c.saveXML(etree, mains)
+        if bt=='Quit':       sys.exit()
+        elif bt=='Produce':  c.produceOutput(mains)
+        elif bt=='Save':     c.saveXML(etree, mains)
+        elif bt=='AutoProd': c.autoProduce = not c.autoProduce
         else:
             print ('B{} {} {} click'.format(bun, bt, bu.text()))
     #---------------------------------------------

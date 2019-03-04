@@ -4,6 +4,14 @@ gen-channel-asm2.py --- SolidPython program to generate channels and
   rails that can be assembled to make dispensers for reel-supplied SMD
   parts.  An early version of the smd-channelsProduce system.
 
+The plastic parts that these programs model are intended to be turned
+over and fastened to a flat surface.  Longitudinal gaps then form
+channels to guide parts-tapes, so that a parts picker - a board
+assembler putting SMD parts onto a circuit board for reflow soldering
+- can pick up SMD parts without the parts-tape moving and spilling
+parts out, and can advance the tape smoothly and pull off the
+transparent tape cover without spilling parts.
+
 smd-channelsProduce system --- Source code for this Qt menu, XML data
 storage, and SolidPython 3D modeling program appears in five .py
 files: ChannelCallbacks.py, ChannelVars.py, loadTablesForXML.py,

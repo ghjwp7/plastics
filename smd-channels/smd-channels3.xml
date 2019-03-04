@@ -62,6 +62,11 @@
        edges.  You can use Overhang1 for one of the clearance widths,
        and Overhang2 for the other.  Overhang1 is used for `left`
        sides of units produced, and Overhang2 for the other.
+
+       Alternate overhangs: `Over.1 alt` and `Over.2 alt` are
+       overhangs used in setback (or cutout) sections of units.  The
+       length of the cutout section is cap length - 2*(end length) or
+       0, whichever is larger.
        
        The narrow clearance usually is less than a millimeter,
        say 0.8 mm, while the wide clearance typically is over 3 mm.
@@ -120,19 +125,26 @@
   <table tab='2' cue='rails'  name='Unit Specs'  wpix='640'  hpix='100'  >
     <!-- This contains guide channel data items reflecting user
          preferences or needs, such as overall lengths, cutaway
-         lengths, pillar diameters and spacing, etc.  These data
+         lengths, post diameters and spacing, etc.  These data
          elements need to be tape- and self-consistent but otherwise
          are free. Each row represents an alternate set of specs.
 
-      Data elements in this table can be set per user preference, as
-      long as they are self-consistent and consistent with tape type.
-      For example, CapWide - overhang widths > PillarOD > PillarID;
-      that is, the outer diameter of a cylinder must be greater than
-      its inner diameter, and cylinder must fit between outer edges of
-      support legs, which are inset by overhang widths.  For another
-      example, CutoutLen == CapLen - 2*EndLen; that is, the length
-      of side with no overhang depends on Cap Length and cap
-      End-Length.  If CutoutLen is negative, there is no cutout.
+      Data elements in this table can be set per user preference.
+      Numbers consistent with tape type and reality should be used.
+      For example, CapWide - overhang widths > PostOD > PostID; that
+      is, the outer diameter of a cylinder should be greater than its
+      inner diameter (or it will have no walls).  The post should fit
+      between outer edges of support legs, which are inset from cap
+      edges by specified overhang widths (or it will interfere with
+      tape path).  Overhangs wider than cap widths will mush parts
+      together.
+
+      For another example, CutoutLen == CapLen - 2*EndLen; that is,
+      the length of side with no overhang depends on Cap Length and
+      cap End-Length.  If CutoutLen is negative, there is no cutout.
+      If EndLen is zero or negative, CutoutLen equals overall length.
+      If end-padding or an overhang is negative, legs will extend
+      unsupported beyond the cap, a 3D printing problem case.
     -->
     
     <columnData>    <!-- Attributes for rows of `Unit Specs` -->
@@ -144,7 +156,8 @@
 		    for making units.  This is a `radio button` - only
 		    one row is selected at once.' />
       <column  col='02' cue='CapWide' name='Cap Width'     fmt='f'
-	       tip='Overall width of unit; eg 10 to 20 mm' />
+	       tip='Overall width of unit; eg 10 to 20 mm; should
+		    exceed PostOD + 2*max(overhangs)' />
       <column  col='03' cue='CapLen' name='Cap Len'     fmt='f'
 	       tip='Overall length of unit; eg 50 to 200 mm' />
       <column  col='04' cue='EndLen' name='Cap End-Len' fmt='f'
@@ -160,10 +173,10 @@
 	       tip='Number of posts to produce, eg 2 - 3 - 4' />
       <column  col='07' cue='PostOffset' name='Post Offset' fmt='f'
 	       tip='Offset from end-of-unit to centerline of first post' />
-      <column  col='08' cue='PostID' name='Pillar ID'      fmt='f'
-	       tip='Inside diameter (hole diameter) of post or pillar' />
-      <column  col='09' cue='PostOD' name='Pillar OD'      fmt='f'
-	       tip='Outside diameter of post or pillar; wall-thickness
+      <column  col='08' cue='PostID' name='Post ID'      fmt='f'
+	       tip='Inside diameter (hole diameter) of post />
+      <column  col='09' cue='PostOD' name='Post OD'      fmt='f'
+	       tip='Outside diameter of post; wall-thickness
 		    of post is (OD-ID)/2' />
       <column  col='10' cue='LegThik' name='Leg-Thick'     fmt='f'
 	       tip='Thickness of leg cross-section; eg 1-2 mm' />
@@ -171,24 +184,24 @@
 	       tip='Thickness of cap cross-section; eg 1-2 mm' />
       <column  col='12' cue='Bridges' name='Bridges'       fmt='i'
 	       tip='This is the number of bridges to produce.
-		    A bridge goes halfway across an inter-unit
-		    channel gap. Outer edges of first and last
-		    units have no bridge parts.
-		    ' />
+		    Bridges are narrow strips across the set of parts, to
+		    hold them at correct channel distances while being
+		    fastened down.  Bridges are evenly spaced.' />
       <column  col='13' cue='BridgeOffset' name='Brg Offset' fmt='f'
-	       tip='Bridge Offset: distance from end-of-unit to centerline of first Bridge' />
+	       tip='Bridge Offset: distance from end-of-unit to
+		    centerline of first Bridge or last Bridge' />
       <column  col='14' cue='BridgeWide' name='Brg Width' fmt='f'
 	       tip='Bridge Width: width of bridge; eg 3-6 mm' />
       <!--column col='1' cue='' name='' tip='' /-->
     </columnData>
     
     <row label='lean'  Use=''  BridgeOffset='13' BridgeWide='4' Bridges='0'
-	 CapLen='90' CapThik='1' CapWide='10' EndLen='15' LegThik='1'
+	 CapLen='90' CapThik='1' CapWide='11.5' EndLen='15' LegThik='1'
 	 PadLen='5' PostID='3.1' PostOD='5.5' PostOffset='13'
 	 Posts='3'  > </row>
     
     <row label='leanB'  Use=''  BridgeOffset='13' BridgeWide='5' Bridges='2'
-	 CapLen='90' CapThik='1' CapWide='10' EndLen='15' LegThik='1'
+	 CapLen='90' CapThik='1' CapWide='11.5' EndLen='15' LegThik='1'
 	 PadLen='5' PostID='3.1' PostOD='5.5' PostOffset='13'
 	 Posts='3'  > </row>
     

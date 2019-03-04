@@ -185,9 +185,9 @@ def makeLegs(rail, tapeA, tapeB, maxHi):
     legIn   = cappedCube(LegLen, LegSepI, maxHi+2*eps, [overEnd/2, tapeA.oho+LegThik, CapThik-eps/2])
 
     cutLen = CapLen - 2*EndLen
-    testrs = rampSide(cutLen, tapeA.oho-tapeA.ohoa+eps, maxHi+CapThik+eps, [EndLen, tapeA.ohoa-eps/2, -eps/2], -90)
-    testls = rampSide(cutLen, tapeB.oh1-tapeB.oh1a+eps, maxHi+CapThik+eps, [EndLen, CapWide+tapeB.oh1a-tapeB.oh1-eps/2, -eps/2], 90)
-    return color(Green)(legOut-legIn+chanA+chanB), color(Red)(testrs)+color(Magenta)(testls)
+    cutR = rampSide(cutLen, tapeA.oho-tapeA.ohoa+eps, maxHi+CapThik+eps, [EndLen, tapeA.ohoa-eps/2, -eps/2], -90)
+    cutL = rampSide(cutLen, tapeB.oh1-tapeB.oh1a+eps, maxHi+CapThik+eps, [EndLen, CapWide+tapeB.oh1a-tapeB.oh1-eps/2, -eps/2], 90)
+    return color(Green)(legOut-legIn+chanA+chanB), color(Red)(cutR)+color(Magenta)(cutL)
 #--------------------------------------------------
 def makeUnit(rail, tapeA, tapeB, maxHi):
     '''Make a unit based on rail length-and-width specs in rail, and tape
@@ -203,7 +203,7 @@ def makeUnit(rail, tapeA, tapeB, maxHi):
     asm = cap + legs - cutout
     px = rail.PostOffset
     for pn in range(rail.nPosts):          # Add set of posts
-        asm += makeTube(rail.PostID, rail.PostOD, maxHi, [px, rail.CapWide/2, 0], 0, rail.eps)
+        asm += makeTube(rail.PostID, rail.PostOD, CapThik+maxHi, [px, rail.CapWide/2, 0], 0, rail.eps)
         px  += PostStep
     return asm
 #--------------------------------------------------
