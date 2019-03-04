@@ -24,6 +24,13 @@
 #       pydoc -w XYZ; xdotool windowactivate $WindowID key ctrl+F5
 # which sends a ctrl-F5 to specified window after running pydoc.
 
+# [Problem noted when browser is FireFox instead of Chromium: All of
+# ^F5, F5, and ^r and ^R when sent in by this script seem to move the
+# viewing point to URL-point (ie top of page) instead of current
+# point.  Basically a reload instead of a refresh.  But when those are
+# entered manually on Firefox browser page, only ^F5 and ^R do so,
+# with F5 and ^r staying in place.  Q: browser issue, or xdotool issue?]
+
 if [ $# -gt 0 ]
 then pyFile=$1
 else pyFile=$(ls -t *.py |  head -1)
@@ -41,5 +48,8 @@ echo pyFile is $pyFile and WindowID is $WindowID ... Awaiting changes ...
 while  S=$(inotifywait -eMODIFY ${pyFile}.py  2>/dev/null)
 do
     echo Updating at $(date) ... $(pydoc -w $pyFile)
-    xdotool windowactivate $WindowID key ctrl+F5
+    #xdotool windowactivate $WindowID key ctrl+F5
+    #xdotool key --window $WindowID ctrl+F5
+    #xdotool key --window $WindowID ctrl+r
+    xdotool key --window $WindowID F5
 done

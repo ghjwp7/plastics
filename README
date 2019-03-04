@@ -19,6 +19,7 @@ gen-flanged-tube3.py --- SolidPython program to generate a flanged and
   in place when bulkhead mounted.  Illustrates making mating threads
   with multiple thread starts.
 
-gen-channel-asm2.py --- SolidPython program to generate channels and
-  rails that can be assembled to make dispensers for reel-supplied SMD
-  parts
+smd-channels/ --- This directory holds programs and data for
+  generating channels and rails for use as dispensing-guides for
+  reel-supplied SMD parts.
+  

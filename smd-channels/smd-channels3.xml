@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<frame>
+  <!-- SMD-channels data tables: Tape Data, Channel Specs, Parts to
+       Make; by jiw 22 Feb 2019
+
+       Each <table ... /> record contains the following: a set of
+       table attribute values (see list below); a `columndata`
+       section; a `row` record for each row of the table; and
+       (optionally) a `style` entry.
+
+       Columndata: This section specifies names and characteristics
+       of table columns.  It contains a `column` entry for each
+       column of the current table.  See attributes list, below.
+
+       Row records: Each of these is a list of attribute keys and
+       corresponding attribute values - data to fill one row.
+       
+       Styles:  Each <style part='x' /> entry should have x as a valid
+       cascading style sheet part.  Style entry parts for a table are
+       concatenated together (in no particular order) as they occur.
+       This blob of styles is applied via a statement like
+       tab.setStyleSheet(blob), where tab is current table.  Eligible
+       style targets include QTableWidget, QHeaderView, and
+       QTableCornerButton.
+
+
+       Table attributes are:  tab, name, cue, wpix, hpix.
+       tab:    an id number (1,2,3...) for the table.  When appended to
+               string 'Table' should form a valid python identifier.
+       name:   the name of the table
+       cue:    a string the app software can treat as a table ID
+       wpix:   Minimum allowed width of table display pane; pixels
+       hpix:   Minimum allowed height of table display pane; pixels
+
+
+       Column attributes are:
+       col:  column number.  Column appearance order is given by
+             sorting col values into alphanumeric order; eg, 1, 10, 2...
+       cue:  a string the app software can use as a variable name
+       name: column name
+       fmt:  data-type letter, with values f, i, r, or s,
+             indicating float, integer, radio-button or string.
+	     (In this framework, at most one radio-button per
+	     table is selected at any given time.
+       tip:  tooltip to be displayed in the app when the column
+             name is hovered upon.
+       -->
+  
+<table tab='1'  cue='tapes'  name='Tape Data'  wpix='600'  hpix='220'  >
+    <!-- The `Tape Data` table: This data should be obtained from part
+         spec sheets or from measurements of tape.
+
+       Re names and nicknames: These are used later in the `Parts to
+       Make` table to say what set of specs to use.  If multiple tapes
+       have the same name or nick and are called for by the duplicated
+       name, `Parts to Make` will choose one of them in some undefined
+       way.  cue, name, and nick strings are case sensitive and may
+       appear in any order within records.
+
+       Re overhangs: Parts tapes typically have more clearance along
+       one edge than the other.  Call these the `wide` and `narrow`
+       edges.  You can use Overhang1 for one of the clearance widths,
+       and Overhang2 for the other.  Overhang1 is used for `left`
+       sides of units produced, and Overhang2 for the other.
+       
+       The narrow clearance usually is less than a millimeter,
+       say 0.8 mm, while the wide clearance typically is over 3 mm.
+       An overhang that is too narrow is undesirable; 3D printing a
+       lip of 0.8 mm width results in less-secure tape holding than
+       printing one twice as wide, so it is reasonable to use a wider
+       overhang when feasible.  An overhang that is too wide, on the
+       other hand, makes it more difficult to load tape into the
+       channel and more difficult to smoothly remove the transparent
+       top cover tape when dispensing parts, besides interfering with
+       lifting parts out of their wells in the tape.  While 3.5 mm
+       wide-side overhang often is feasible, 2 mm usually is adequate.
+       -->
+  
+    <columnData>    <!-- Attributes for rows of `Tape Data` -->
+      <column  col='1' cue='name'  name='Tape Type'       fmt='s'
+		  tip='Tape Type is a string to identify the kind of
+		       part or taping this channel should be suitable for.' />
+      <column  col='2' cue='nick'  name='nickname'        fmt='s'
+		  tip='A nickname that may be used in other tables to refer
+		       to this taping. If nick is empty or not specified,
+		       nick = name.' />
+      <column  col='3' cue='wide'  name='Tape Width'      fmt='f'
+		  tip='Tape Width, mm, typically 8, 12, or 16 mm' />
+      <column  col='4' cue='high'  name='Tape High'       fmt='f'
+		  tip='Tape Height, mm - the height at which an
+		       overhang projection should begin.' />
+      <column  col='5' cue='oh1'   name='Overhang1'       fmt='f'
+		  tip='First (left-side) overhang for constraining tape motion' />
+      <column  col='6' cue='oho'   name='Overhang2'       fmt='f'
+		  tip='Other (right-side) overhang for constraining tape motion' />
+      <column  col='7' cue='oh1a'   name='Over.1 alt'       fmt='f'
+		  tip='First (left-side) alternate (cutback midsection) overhang' />
+      <column  col='8' cue='ohoa'   name='Over.2 alt'       fmt='f'
+		  tip='Other (right-side) alternate (cutback midsection) overhang' />
+    </columnData>
+    
+    <row  name='Resistor'     wide='8'   high='1'    oh1='2'  oho='0.8' oh1a='1' ohoa='0' nick='r1206' > </row>
+    <row  name='LED-1206'     wide='8'   high='1.4'  oh1='2'  oho='0.8' oh1a='1' ohoa='0' nick='l1206' > </row>
+    <row  name='crystal 0325' wide='8'   high='1.8'  oh1='2'  oho='0.8' oh1a='1' ohoa='0' nick='q0325' > </row>
+    <row  name='null'         wide='0'   high='1'    oh1='0'  oho='0'   oh1a='1' ohoa='0'> </row>
+    <row  name='test'         wide='10'  high='2'    oh1='3'  oho='2'   oh1a='1' ohoa='0' > </row>
+    <row  name='SS14'         wide='12'  high='3'    oh1='2'  oho='0.8' oh1a='1' ohoa='0' > </row>
+    <row  name='TSOP8'        wide='12'  high='2.5'  oh1='2'  oho='0.8' oh1a='1' ohoa='0' > </row>
+    <row  name='TSOP16'       wide='16'  high='2.5'  oh1='2'  oho='0.8' oh1a='1' ohoa='0' > </row>
+    <row  name='TQFP32A'      wide='16'  high='2'    oh1='2'  oho='1.5' oh1a='1' ohoa='0' > </row>
+    <row  name='tantCap'      wide='12'  high='3.5'  oh1='2'  oho='0.8' oh1a='1' ohoa='0' nick='C' > </row>
+    <row  name='inductor'     wide='16'  high='6'    oh1='2'  oho='0.8' oh1a='1' ohoa='0' nick='L' > </row>
+    
+    <style part='QTableWidget { font: bold 16pt Helvetica; color: lightcyan;
+			 background-color: #202800; text-align: center; }' />
+    <style part='QHeaderView { background-color:gray; color: red;
+		 text-align: center; font-size:16pt; }' />
+  </table>
+
+  <table tab='2' cue='rails'  name='Unit Specs'  wpix='640'  hpix='100'  >
+    <!-- This contains guide channel data items reflecting user
+         preferences or needs, such as overall lengths, cutaway
+         lengths, pillar diameters and spacing, etc.  These data
+         elements need to be tape- and self-consistent but otherwise
+         are free. Each row represents an alternate set of specs.
+
+      Data elements in this table can be set per user preference, as
+      long as they are self-consistent and consistent with tape type.
+      For example, CapWide - overhang widths > PillarOD > PillarID;
+      that is, the outer diameter of a cylinder must be greater than
+      its inner diameter, and cylinder must fit between outer edges of
+      support legs, which are inset by overhang widths.  For another
+      example, CutoutLen == CapLen - 2*EndLen; that is, the length
+      of side with no overhang depends on Cap Length and cap
+      End-Length.  If CutoutLen is negative, there is no cutout.
+    -->
+    
+    <columnData>    <!-- Attributes for rows of `Unit Specs` -->
+      <column  col='00' cue='label' name='Spec-Label'      fmt='s'
+	       tip='Identifies the style of channel this specification describes.
+	         To use it, click its corresponding `Use` box or row.' />
+      <column  col='01' cue='Use' name='Use'               fmt='r'
+	       tip='Click a `Use` cell to choose its row as specs
+		    for making units.  This is a `radio button` - only
+		    one row is selected at once.' />
+      <column  col='02' cue='CapWide' name='Cap Width'     fmt='f'
+	       tip='Overall width of unit; eg 10 to 20 mm' />
+      <column  col='03' cue='CapLen' name='Cap Len'     fmt='f'
+	       tip='Overall length of unit; eg 50 to 200 mm' />
+      <column  col='04' cue='EndLen' name='Cap End-Len' fmt='f'
+	       tip='Lengths of full-width sections at ends of unit;
+		    ie, with full overhangs, no cutouts or setbacks.
+		    Middle section of unit, between full-width parts,
+		    gets setback.' />
+      <column  col='05' cue='PadLen' name='End-padding'    fmt='f'
+	       tip='Extra longitudinal length of cap projection,
+		    beyond the half-circles at ends of legs; eg 5 to
+		    10 mm; for better adhesion during 3D printing' />
+      <column  col='06' cue='Posts' name='Posts'           fmt='i'
+	       tip='Number of posts to produce, eg 2 - 3 - 4' />
+      <column  col='07' cue='PostOffset' name='Post Offset' fmt='f'
+	       tip='Offset from end-of-unit to centerline of first post' />
+      <column  col='08' cue='PostID' name='Pillar ID'      fmt='f'
+	       tip='Inside diameter (hole diameter) of post or pillar' />
+      <column  col='09' cue='PostOD' name='Pillar OD'      fmt='f'
+	       tip='Outside diameter of post or pillar; wall-thickness
+		    of post is (OD-ID)/2' />
+      <column  col='10' cue='LegThik' name='Leg-Thick'     fmt='f'
+	       tip='Thickness of leg cross-section; eg 1-2 mm' />
+      <column  col='11' cue='CapThik' name='Cap-Thick'     fmt='f'
+	       tip='Thickness of cap cross-section; eg 1-2 mm' />
+      <column  col='12' cue='Bridges' name='Bridges'       fmt='i'
+	       tip='This is the number of bridges to produce.
+		    A bridge goes halfway across an inter-unit
+		    channel gap. Outer edges of first and last
+		    units have no bridge parts.
+		    ' />
+      <column  col='13' cue='BridgeOffset' name='Brg Offset' fmt='f'
+	       tip='Bridge Offset: distance from end-of-unit to centerline of first Bridge' />
+      <column  col='14' cue='BridgeWide' name='Brg Width' fmt='f'
+	       tip='Bridge Width: width of bridge; eg 3-6 mm' />
+      <!--column col='1' cue='' name='' tip='' /-->
+    </columnData>
+    
+    <row label='lean'  Use=''  BridgeOffset='13' BridgeWide='4' Bridges='0'
+	 CapLen='90' CapThik='1' CapWide='10' EndLen='15' LegThik='1'
+	 PadLen='5' PostID='3.1' PostOD='5.5' PostOffset='13'
+	 Posts='3'  > </row>
+    
+    <row label='leanB'  Use=''  BridgeOffset='13' BridgeWide='5' Bridges='2'
+	 CapLen='90' CapThik='1' CapWide='10' EndLen='15' LegThik='1'
+	 PadLen='5' PostID='3.1' PostOD='5.5' PostOffset='13'
+	 Posts='3'  > </row>
+    
+    <row label='test'  Use='*'  BridgeOffset='15' BridgeWide='5' Bridges='2'
+	 CapLen='100' CapThik='1' CapWide='15' EndLen='20' LegThik='1'
+	 PadLen='5' PostID='3' PostOD='5' PostOffset='20'
+	 Posts='3'  > </row>
+    
+    <row label='long'  Use=''   BridgeOffset='15' BridgeWide='4' Bridges='0'
+	 CapLen='140' CapThik='1.2' CapWide='13' EndLen='20'
+	 LegThik='1.2' PadLen='6' PostID='3.1' PostOD='5.5'
+	 PostOffset='15' Posts='3'  > </row>
+    
+    <row label='longB'  Use=''  BridgeOffset='15' BridgeWide='4' Bridges='3'
+	 CapLen='140' CapThik='1.2' CapWide='13' EndLen='20'
+	 LegThik='1.2' PadLen='6' PostID='3.1' PostOD='5.5'
+	 PostOffset='15' Posts='3'  > </row>
+
+    <row label='short'  Use=''  BridgeOffset='15' BridgeWide='4' Bridges='3'
+	 CapLen='0' CapThik='1.2' CapWide='0' EndLen='20'
+	 LegThik='1.2' PadLen='6' PostID='3.1' PostOD='5.5'
+	 PostOffset='15' Posts='3'  > </row>
+    
+    <style part='QHeaderView { background-color:gray; color: red; text-align: center;
+		 text-align: center; font-size:16pt; }' />
+  </table>
+  
+  <table tab='3'  cue='makes'  name='Units to Make'  wpix='640'  hpix='100' > 
+    <!-- This lists which side-combinations are to be produced, plus
+         estimated unit volumes.  Each row of the table (except first
+         and last) contributes a wide side to one unit, and a narrow
+         side to the next unit.  The first row contributes a narrow
+         side, and the last a wide side.
+
+         Example: Suppose the rows list types a, b, c, d.  The list of
+         contributed sides is a.2, b.1, b.2, c.1, c.2, d.1, in which
+         .1 denotes an Overhang1 side, and .2 an Overhang2 side.
+         Units are made by grouping the contributed sides in pairs:
+         [a.2,b.1] [b.2,c.1] [c.2,d.1], where [p,q] specifies the left
+         and right sides of one unit.
+	 
+         Channel ordering may affect unit volumes slightly, because the leg
+         height of a unit is the maximum of the heights of joined
+         types.  You may wish to add, move, or modify rows or specs
+         for efficiency. (Eg make units in order by increasing height)
+
+         The number of units made is one less than the number of types
+	 listed in this table, since two sides are skipped at first and
+	 last rows.  (Typically, use `null` as first and last types.)
+
+         The currently-selected specs line from Table 2 is used to
+	 produce units, whenever the Produce button is clicked. -->
+    
+    <columnData>    <!-- Attributes for rows of `Units to Make` -->
+      <column  col='t' cue='ttype' name='Tape Type'  fmt='s'
+	       tip='Tape-type for adjacent sides of adjacent units.
+		    Use `null` ttype when no-overhang is desired.' />
+      <column  col='v' cue='volRO' name='Unit volume'     fmt='f'
+	       tip= "Rough estimate of part volume, mm^3 (A read-only field)" />
+    </columnData>
+    
+    <row  ttype='null'  volRO='0'> </row>
+    <row  ttype='test'  volRO='0'> </row>
+    <row  ttype='L'  volRO='0'> </row>
+    <row  ttype='test'  volRO='0'> </row>
+    <row  ttype='C'  volRO='0'> </row>
+    <row  ttype='test'  volRO='0'> </row>
+    <row  ttype='null'  volRO='0'> </row>
+    <style part='QHeaderView { background-color:gray; color: red; text-align: center;
+		 text-align: center; font-size:16pt; }' />
+  </table>
+
+  <table tab='4' cue='hints' name='Instructions' wpix='600' hpix='60' >
+	 
+    <columnData>  <!-- Attributes for rows of `Channel Specs` -->
+
+      <column col='1' cue='item' name='How to use these tables:' fmt='s'
+	   tip='You can scroll through the lines below, for directions
+               about how to enter specifications for a set of units to
+               make a channel-guide assembly.' />
+    </columnData>
+
+    <row item='Hover cursor on a Column title to see its tooltip text.'></row>
+    <row item='To replace a data field, click it and type new text, or'></row>
+    <row item='go to it with arrow-keys and type new text.'></row>
+    <row item='To edit a field, double click it, then click at edit point.'></row>
+    <row item='To see all of the Specifications fields, scroll horizontally with'></row>
+    <row item='scroll bar or with Home/End/arrow keys; or drag window edge'></row>
+    <row item='to expand its horizontal size; or click full-page box in title line.'> </row>
+    <row item='To see all of the Tape Data rows, scroll vertically with wheel or'></row>
+    <row item='scroll bar; or expand window vertical size; or drag separator lines.'></row>
+    <row item='Click to Select a cell, column, or row.  Click pink cornerbutton'></row>
+    <row item='to Select all cells.  Click and drag to Select a range of cells.'></row>
+    <row item='To close these directions, drag the slider line to bottom.'></row>
+    <row item='To reopen them, drag it (with double arrowhead cursor) back up.' ></row>
+    <row item=''></row>
+ 
+    <style part=' QTableWidget { font: 16pt
+  Helvetica; color: black; background-color: lightgray; }' /> <style
+  part=' QHeaderView { background-color:gray; color: gray; }' />
+  </table> </frame>
