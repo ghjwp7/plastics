@@ -174,7 +174,7 @@
       <column  col='07' cue='PostOffset' name='Post Offset' fmt='f'
 	       tip='Offset from end-of-unit to centerline of first post' />
       <column  col='08' cue='PostID' name='Post ID'      fmt='f'
-	       tip='Inside diameter (hole diameter) of post />
+	       tip='Inside diameter (hole diameter) of post' />
       <column  col='09' cue='PostOD' name='Post OD'      fmt='f'
 	       tip='Outside diameter of post; wall-thickness
 		    of post is (OD-ID)/2' />
@@ -260,7 +260,9 @@
 	       tip='Tape-type for adjacent sides of adjacent units.
 		    Use `null` ttype when no-overhang is desired.' />
       <column  col='v' cue='volRO' name='Unit volume'     fmt='f'
-	       tip= "Rough estimate of part volume, mm^3 (A read-only field)" />
+	       tip= "Rough estimate of part volume with sides from this and
+		     previous row.  Units are ml or cm^3.  This is a read-only
+		     field. Blank or unrecognized names get no volume info." />
     </columnData>
     
     <row  ttype='null'  volRO='0'> </row>
@@ -270,6 +272,13 @@
     <row  ttype='C'  volRO='0'> </row>
     <row  ttype='test'  volRO='0'> </row>
     <row  ttype='null'  volRO='0'> </row>
+    <row  ttype=''      volRO='0'> </row>
+    <row  ttype=''      volRO='0'> </row>
+    <row  ttype=''      volRO='0'> </row>
+    <row  ttype=''      volRO='0'> </row>
+    <row  ttype=''      volRO='0'> </row>
+    <row  ttype=''      volRO='0'> </row>
+    
     <style part='QHeaderView { background-color:gray; color: red; text-align: center;
 		 text-align: center; font-size:16pt; }' />
   </table>

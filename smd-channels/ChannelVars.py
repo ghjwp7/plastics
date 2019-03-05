@@ -1,6 +1,16 @@
 # Module:  ChannelVars.py
 # Get/Put variables for .xml file ./smd-channels3.xml
-# Generated Sun Mar  3 17:05:35 2019 by ./make-xml-accessors.py
+# Generated Mon Mar  4 17:45:47 2019 by ./make-xml-accessors.py
+def xml_float(s):
+    try:
+        return float(s)
+    except ValueError:
+        return -1.
+def xml_int(s):
+    try:
+        return int(s)
+    except ValueError:
+        return -1
 
 class Table1:  # Class: Accessors for a row of tab1 / tapes / Tape Data
     def __init__(self,tab,ro):  self.tab, self.ro = tab, ro
@@ -28,17 +38,17 @@ class Table1:  # Class: Accessors for a row of tab1 / tapes / Tape Data
     def putName(self, v):       self.tab.item(self.ro,0).setText(str(v))
     def getNick(self):          return self.tab.item(self.ro,1).text()
     def putNick(self, v):       self.tab.item(self.ro,1).setText(str(v))
-    def getWide(self):          return float(self.tab.item(self.ro,2).text())
+    def getWide(self):          return xml_float(self.tab.item(self.ro,2).text())
     def putWide(self, v):       self.tab.item(self.ro,2).setText(str(v))
-    def getHigh(self):          return float(self.tab.item(self.ro,3).text())
+    def getHigh(self):          return xml_float(self.tab.item(self.ro,3).text())
     def putHigh(self, v):       self.tab.item(self.ro,3).setText(str(v))
-    def getOh1(self):           return float(self.tab.item(self.ro,4).text())
+    def getOh1(self):           return xml_float(self.tab.item(self.ro,4).text())
     def putOh1(self, v):        self.tab.item(self.ro,4).setText(str(v))
-    def getOho(self):           return float(self.tab.item(self.ro,5).text())
+    def getOho(self):           return xml_float(self.tab.item(self.ro,5).text())
     def putOho(self, v):        self.tab.item(self.ro,5).setText(str(v))
-    def getOh1a(self):          return float(self.tab.item(self.ro,6).text())
+    def getOh1a(self):          return xml_float(self.tab.item(self.ro,6).text())
     def putOh1a(self, v):       self.tab.item(self.ro,6).setText(str(v))
-    def getOhoa(self):          return float(self.tab.item(self.ro,7).text())
+    def getOhoa(self):          return xml_float(self.tab.item(self.ro,7).text())
     def putOhoa(self, v):       self.tab.item(self.ro,7).setText(str(v))
 
     @staticmethod          #    Column #   Format     Id           Column-name 
@@ -78,37 +88,37 @@ class Table2:  # Class: Accessors for a row of tab2 / rails / Unit Specs
     @staticmethod
     def colFmts():              return ['s', 'r', 'f', 'f', 'f', 'f', 'i', 'f', 'f', 'f', 'f', 'f', 'i', 'f', 'f']
     @staticmethod
-    def colNames():             return ['Spec-Label', 'Use', 'Cap Width', 'Cap Len', 'Cap End-Len', 'End-padding', 'Posts', 'Post Offset', 'Pillar ID', 'Pillar OD', 'Leg-Thick', 'Cap-Thick', 'Bridges', 'Brg Offset', 'Brg Width']
+    def colNames():             return ['Spec-Label', 'Use', 'Cap Width', 'Cap Len', 'Cap End-Len', 'End-padding', 'Posts', 'Post Offset', 'Post ID', 'Post OD', 'Leg-Thick', 'Cap-Thick', 'Bridges', 'Brg Offset', 'Brg Width']
 
     def getLabel(self):         return self.tab.item(self.ro,0).text()
     def putLabel(self, v):      self.tab.item(self.ro,0).setText(str(v))
-    def getUse(self):           return float(self.tab.item(self.ro,1).text())
+    def getUse(self):           return xml_float(self.tab.item(self.ro,1).text())
     def putUse(self, v):        self.tab.item(self.ro,1).setText(str(v))
-    def getCapWide(self):       return float(self.tab.item(self.ro,2).text())
+    def getCapWide(self):       return xml_float(self.tab.item(self.ro,2).text())
     def putCapWide(self, v):    self.tab.item(self.ro,2).setText(str(v))
-    def getCapLen(self):        return float(self.tab.item(self.ro,3).text())
+    def getCapLen(self):        return xml_float(self.tab.item(self.ro,3).text())
     def putCapLen(self, v):     self.tab.item(self.ro,3).setText(str(v))
-    def getEndLen(self):        return float(self.tab.item(self.ro,4).text())
+    def getEndLen(self):        return xml_float(self.tab.item(self.ro,4).text())
     def putEndLen(self, v):     self.tab.item(self.ro,4).setText(str(v))
-    def getPadLen(self):        return float(self.tab.item(self.ro,5).text())
+    def getPadLen(self):        return xml_float(self.tab.item(self.ro,5).text())
     def putPadLen(self, v):     self.tab.item(self.ro,5).setText(str(v))
-    def getPosts(self):         return int(self.tab.item(self.ro,6).text())
+    def getPosts(self):         return xml_int(self.tab.item(self.ro,6).text())
     def putPosts(self, v):      self.tab.item(self.ro,6).setText(str(v))
-    def getPostOffset(self):    return float(self.tab.item(self.ro,7).text())
+    def getPostOffset(self):    return xml_float(self.tab.item(self.ro,7).text())
     def putPostOffset(self, v): self.tab.item(self.ro,7).setText(str(v))
-    def getPostID(self):        return float(self.tab.item(self.ro,8).text())
+    def getPostID(self):        return xml_float(self.tab.item(self.ro,8).text())
     def putPostID(self, v):     self.tab.item(self.ro,8).setText(str(v))
-    def getPostOD(self):        return float(self.tab.item(self.ro,9).text())
+    def getPostOD(self):        return xml_float(self.tab.item(self.ro,9).text())
     def putPostOD(self, v):     self.tab.item(self.ro,9).setText(str(v))
-    def getLegThik(self):       return float(self.tab.item(self.ro,10).text())
+    def getLegThik(self):       return xml_float(self.tab.item(self.ro,10).text())
     def putLegThik(self, v):    self.tab.item(self.ro,10).setText(str(v))
-    def getCapThik(self):       return float(self.tab.item(self.ro,11).text())
+    def getCapThik(self):       return xml_float(self.tab.item(self.ro,11).text())
     def putCapThik(self, v):    self.tab.item(self.ro,11).setText(str(v))
-    def getBridges(self):       return int(self.tab.item(self.ro,12).text())
+    def getBridges(self):       return xml_int(self.tab.item(self.ro,12).text())
     def putBridges(self, v):    self.tab.item(self.ro,12).setText(str(v))
-    def getBridgeOffset(self):  return float(self.tab.item(self.ro,13).text())
+    def getBridgeOffset(self):  return xml_float(self.tab.item(self.ro,13).text())
     def putBridgeOffset(self, v): self.tab.item(self.ro,13).setText(str(v))
-    def getBridgeWide(self):    return float(self.tab.item(self.ro,14).text())
+    def getBridgeWide(self):    return xml_float(self.tab.item(self.ro,14).text())
     def putBridgeWide(self, v): self.tab.item(self.ro,14).setText(str(v))
 
     @staticmethod          #    Column #   Format     Id           Column-name 
@@ -128,9 +138,9 @@ class Table2:  # Class: Accessors for a row of tab2 / rails / Unit Specs
     @staticmethod
     def colPostOffset():   return  7   #      f     PostOffset     Post Offset
     @staticmethod
-    def colPostID():       return  8   #      f     PostID         Pillar ID
+    def colPostID():       return  8   #      f     PostID         Post ID
     @staticmethod
-    def colPostOD():       return  9   #      f     PostOD         Pillar OD
+    def colPostOD():       return  9   #      f     PostOD         Post OD
     @staticmethod
     def colLegThik():      return 10   #      f     LegThik        Leg-Thick
     @staticmethod
@@ -166,7 +176,7 @@ class Table3:  # Class: Accessors for a row of tab3 / makes / Units to Make
 
     def getTtype(self):         return self.tab.item(self.ro,0).text()
     def putTtype(self, v):      self.tab.item(self.ro,0).setText(str(v))
-    def getVolRO(self):         return float(self.tab.item(self.ro,1).text())
+    def getVolRO(self):         return xml_float(self.tab.item(self.ro,1).text())
     def putVolRO(self, v):      self.tab.item(self.ro,1).setText(str(v))
 
     @staticmethod          #    Column #   Format     Id           Column-name 

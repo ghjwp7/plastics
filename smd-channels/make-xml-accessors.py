@@ -57,7 +57,7 @@ def colProcess(tabCue, tabNum, tabName, top, modo):
     
     for k, i in enumerate(colCids):
         fmt = colFmts[k]
-        pre  = '' if fmt=='s' else 'int(' if fmt=='i' else 'float('
+        pre  = '' if fmt=='s' else 'xml_int(' if fmt=='i' else 'xml_float('
         post = '' if fmt=='s' else ')'
         modo.write('    def get{}(self):{:{wide}}return {}self.tab.item(self.ro,{}).text(){}\n'.format(i, '', pre, k, post, wide=max(1,14-len(i))))
         modo.write('    def put{}(self, v):{:{wide}}self.tab.item(self.ro,{}).setText(str(v))\n'.format(i, '',k, wide=max(1,11-len(i))))
@@ -75,6 +75,16 @@ def makeModule(xmlFi, modFi, modo, etree):
     modo.write('# Module:  {}\n'.format(modFi))
     modo.write('# Get/Put variables for .xml file {}\n'.format(xmlFi))
     modo.write('# Generated {} by {}\n'.format(ctime(), __file__))
+    modo.write('def xml_float(s):\n')
+    modo.write('    try:\n')
+    modo.write('        return float(s)\n')
+    modo.write('    except ValueError:\n')
+    modo.write('        return -1.\n')
+    modo.write('def xml_int(s):\n')
+    modo.write('    try:\n')
+    modo.write('        return int(s)\n')
+    modo.write('    except ValueError:\n')
+    modo.write('        return -1\n')
 
     tabCues, tabNums, tabNames = [], [], []
     for kid in etree.getroot():

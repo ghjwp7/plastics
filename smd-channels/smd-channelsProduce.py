@@ -48,7 +48,7 @@ class RailData:                 # Specs for channel-rail
 class TapeData:                 # Specs for one tape-type
     '''Get data for one tape type from tapes table, and put into a
     TapeData object.'''
-    def __init__(self, mains, ttype):
+    def __init__(self, mains, ttype, rofrom):
         '''Get data from tapes table for tape type with name ttype.
         On ok result, set tapeOk True, else False
 
@@ -61,6 +61,7 @@ class TapeData:                 # Specs for one tape-type
             if tab.item(ro,coN).text()==ttype or tab.item(ro,coK).text()==ttype:
                 trow = Table1(tab,ro)
                 self.ro   = ro
+                self.rof  = rofrom
                 self.tab  = trow
                 self.wide = trow.getWide()
                 self.high = trow.getHigh()
@@ -70,6 +71,27 @@ class TapeData:                 # Specs for one tape-type
                 self.ohoa  = trow.getOhoa()
                 self.tapeOk = True
                 return
+        # Raise an exception if tape type wasn't found.
+        raise ValueError('Tape type `{}` not found, or no * selected.'.format(ttype))
+#--------------------------------------------------
+def getTapeDataList(mains):
+    '''Make list of TapeData objects, corresponding to tape types found in
+    both Table3 and Table1.  Not-found types are silently elided.
+    Parameter mains is top level of data/display structure.
+    '''
+    tab3 = mains.tab3
+    typeCol = Table3.colTtype()
+    # Make array of tape data
+    tapes = []
+    nro = tab3.rowCount()
+    for ro in range(nro):
+        try:
+            td = TapeData(mains, tab3.item(ro,typeCol).text(), ro)
+            if td.tapeOk:
+                tapes.append(td)
+        except ValueError:
+            pass
+    return tapes
 #--------------------------------------------------
 # Recompute and display volumes of parts    
 def calcVols(mains):
@@ -83,17 +105,13 @@ def calcVols(mains):
         print ('Problem:  No Marked Row Found in Table 2')
         return
     s2 = Table2(tab2, tab2.radioRo)
-
     nro  = tab3.rowCount()
-    ul   = Table3(tab3, 0)        # Get first-row accessors
-    for ro3 in range(1,nro):
-        ur = Table3(tab3, ro3)    # Get next-row accessors
-        ulT, urT = ul.getTtype(), ur.getTtype() # L-side and R-side tape types
-        sl, sr = TapeData(mains, ulT), TapeData(mains, urT) # Locate types, get data
-        if not (sl.tapeOk and sr.tapeOk): # Were both tape types found?
-            print ('TType {} or {} * Not Found'.format(ulT, urT))
-            ur.putVolRO('-0')   # Indicate bad vol calc
-            continue
+    vols = ['']*nro
+    tapes = getTapeDataList(mains)
+    #print 'tapes:', tapes
+    if not tapes: return
+    sl = tapes[0]               # Get first-row accessors
+    for sr in tapes[1:]:        # Get next-row accessors
         legHi = max(sl.high, sr.high)
         caplen = s2.getCapLen()
         # Approx cap volume: rounded corners not accounted for,
@@ -106,9 +124,14 @@ def calcVols(mains):
         PilVol = max(0, s2.getPosts() * legHi * postArea)
         # Compute total approx volume, converting mm^3 to mL
         evol = '{:1.2f}'.format((CapVol+LegVol+PilVol)/1000) # 1000 mm^3 per mL
-        # Push computed value into table
-        ur.putVolRO(evol)
-        ul = ur
+        # Put computed value in list
+        #print 'sr.rof={}   evol={}  vols={}'.format(sr.rof, evol, vols)
+        vols[sr.rof] = evol
+        sl = sr
+    # Push computed values into table
+    vols[0] = '(ml)'
+    for ro in range(nro):
+        Table3(tab3, ro).putVolRO(vols[ro])
 #--------------------------------------------------
 def makeBridges(rail, span):
     BridgeN      = rail.Bridges
@@ -210,14 +233,7 @@ def makeUnit(rail, tapeA, tapeB, maxHi):
 def produceOutput(mains):
     eps = 0.02   # eps is mostly for clearing display sheen
     rail = RailData(mains, eps)
-    # Find max leg height
-    tab3 = mains.tab3
-    typeCol = Table3.colTtype()
-    # Make array of tape data
-    tapes = []
-    for ro in range(tab3.rowCount()):
-        tapes.append(TapeData(mains, tab3.item(ro,typeCol).text()))
-
+    tapes = getTapeDataList(mains)
     # Find max leg height, and span across all units
     maxHi = 0
     span = -rail.CapWide - tapes[0].wide - tapes[-1].wide - tapes[0].oho - tapes[-1].oh1
