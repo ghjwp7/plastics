@@ -107,7 +107,7 @@
     <row  name='Resistor'     wide='8'   high='1'    oh1='2'  oho='0.8' oh1a='1' ohoa='0' nick='r1206' > </row>
     <row  name='LED-1206'     wide='8'   high='1.4'  oh1='2'  oho='0.8' oh1a='1' ohoa='0' nick='l1206' > </row>
     <row  name='crystal 0325' wide='8'   high='1.8'  oh1='2'  oho='0.8' oh1a='1' ohoa='0' nick='q0325' > </row>
-    <row  name='null'         wide='0'   high='1'    oh1='0'  oho='0'   oh1a='1' ohoa='0'> </row>
+    <row  name='null'         wide='0'   high='0'    oh1='0'  oho='0'   oh1a='0' ohoa='0'> </row>
     <row  name='test'         wide='10'  high='2'    oh1='3'  oho='2'   oh1a='1' ohoa='0' > </row>
     <row  name='SS14'         wide='12'  high='3'    oh1='2'  oho='0.8' oh1a='1' ohoa='0' > </row>
     <row  name='TSOP8'        wide='12'  high='2.5'  oh1='2'  oho='0.8' oh1a='1' ohoa='0' > </row>
