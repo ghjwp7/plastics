@@ -161,17 +161,37 @@ def makeTube(idi, odi, hi, transl, half, eps):
     return translate(transl)(tube)
 #--------------------------------------------------
 def rampBar(leng, wide, high, transl):
+    '''Return a bar of specified length, width, height, except with ends
+    ramping up at 45 degrees at one end, -45 at other, in a plane
+    rotated about y axis.  Parameters: leng, wide, high give x,y,z
+    sizes.  transl = 3-vector with x,y,z distances to translate the
+    origin-corner of the bar.
+    '''
     s2 = sqrt(2)
     cu = cube([leng, wide, high])
     box = rotate(a=[0,-45,0])(back(wide)((cube([s2*high, 3*wide, s2*high]))))
     return translate(transl)(cu-box-right(leng)(box))
 #--------------------------------------------------
 def rampSide(leng, wide, high, transl, rotat):
+    '''Return a bar of specified length, width, height, except with ends
+    ramping at 45 degrees at one end, -45 at other.  Is like a rampBar
+    rotated +/- 90 degrees about the x axis.  Parameters: First four as
+    for rampBar.  rotat: +/- 90 for amount of rotation about the x axis.   
+    '''
     # x-axis rotate below exchanges hi, wide - next two lines compensate.
     tcorr = [0,0,-wide] if rotat>0 else [0,-high,0]
     s = rotate([rotat,0,0])(rampBar(leng, high, wide, tcorr))
     return translate(transl)(s)
-    #return s
+#--------------------------------------------------
+def cappedCube(leng, wide, hi, transl):
+    '''Make a rectangular bar of specified size, then add half-rounds to
+    each end.  Resulting length = leng+wide.  Parameters: leng, wide,
+    high give x,y,z sizes.  transl = 3-vector with x,y,z distances to
+    translate the origin-corner of the rectangular bar.
+    '''
+    cu = cube([leng, wide, hi])
+    ci = forward(wide/2)(cylinder(d=wide, h=hi))
+    return translate(transl)(cu + ci + right(leng)(ci))
 #--------------------------------------------------
 def makeLegs(rail, tapeA, tapeB, maxHi): 
     '''Make legs based on specs in params - overall x size from rail, y
@@ -195,11 +215,6 @@ def makeLegs(rail, tapeA, tapeB, maxHi):
     overEnd = 2*PadLen + LegSepO
     LegLen  = CapLen - overEnd
     
-    def cappedCube(leng, wide, hi, transl):
-        cu = cube([leng, wide, hi])
-        ci = forward(wide/2)(cylinder(d=wide, h=hi))
-        return translate(transl)(cu + ci + right(leng)(ci))
-   
     barx  = (CapLen-LegLen-LegSepO)/2
     barz  = CapThik-eps*1.1
     chanA = rampBar(LegLen+LegSepO, tapeA.oho, maxHi-tapeA.high+eps, [barx, 0, barz])
@@ -221,7 +236,7 @@ def makeUnit(rail, tapeA, tapeB, maxHi):
     CapWide = rail.CapWide
     CapThik = rail.CapThik
     PostStep   = (CapLen-2*rail.PostOffset)/max(1,rail.nPosts-1)
-    cap = cube([CapLen, CapWide, CapThik])
+    cap = cappedCube(CapLen-CapWide, CapWide, CapThik,[CapWide/2,0,0])
     legs, cutout = makeLegs(rail, tapeA, tapeB, maxHi)
     asm = cap + legs - cutout
     px = rail.PostOffset
