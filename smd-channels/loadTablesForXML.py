@@ -52,19 +52,20 @@ def ErrorExit(msg, fname):
 def rowProcess(mains, tab, top, colNums, colFmts, colVals):
     rowdat = [v for v in colVals] # Copy default values
     attr = top.attrib
+    colName, colNick = Table1.colName(), Table1.colNick()    
     for key in attr.keys():
         try:
             co = colNums[key]
             rowdat[co] = attr[key]
-            # If key is 'name' and 'nick' isn't set, copy name to nick.
-            if key=='name':
-                nick = colNums.get('nick', None)
-                if nick != None and rowdat[nick]==None:
-                    rowdat[nick] = attr[key]
         except:
             print ('\n\tKey `{}` mistake?  Head keys are {}\n\tand row data is {}\n'.format(key, sorted(colNums.keys()),attr))
-    ro = tab.rowCount()
-    tab.insertRow(ro)
+    # If 'nick' isn't set (is blank or None), copy name to nick.
+    if tab.tabN == '1':
+        print  colName, colNick, rowdat
+        if not rowdat[colNick]:  rowdat[colNick] = rowdat[colName]
+    # Insert next row into display structure
+    ro = tab.rowCount();  tab.insertRow(ro)
+    # Copy items from rowdat into new row
     for co, txt in enumerate(rowdat):
         if colFmts[co]=='r':
             bu = QRadioButton(tab)
@@ -104,6 +105,7 @@ def makeTable(mains, tabN, tbase):
         if elt.tag=='columnData':
             colCues, colNames, colFmts, colVals, colTips = colProcess(tab, elt)
             tab = QTableWidget(0, len(colNames), mains)
+            tab.tabN = tabN
             tab.setHorizontalHeaderLabels(colNames)
             colOrder = {}
             for k, t in enumerate(colCues):
