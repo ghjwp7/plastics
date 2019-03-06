@@ -61,7 +61,6 @@ def rowProcess(mains, tab, top, colNums, colFmts, colVals):
             print ('\n\tKey `{}` mistake?  Head keys are {}\n\tand row data is {}\n'.format(key, sorted(colNums.keys()),attr))
     # If 'nick' isn't set (is blank or None), copy name to nick.
     if tab.tabN == '1':
-        print  colName, colNick, rowdat
         if not rowdat[colNick]:  rowdat[colNick] = rowdat[colName]
     # Insert next row into display structure
     ro = tab.rowCount();  tab.insertRow(ro)
