@@ -82,25 +82,25 @@
        -->
   
     <columnData>    <!-- Attributes for rows of `Tape Data` -->
-      <column  col='1' cue='name'  name='Tape Type'       fmt='s'
+      <column  col='1' cue='name'  name='Tape Type'       fmt='s' val=''
 		  tip='Tape Type is a string to identify the kind of
 		       part or taping this channel should be suitable for.' />
-      <column  col='2' cue='nick'  name='nickname'        fmt='s'
+      <column  col='2' cue='nick'  name='nickname'        fmt='s' val=''
 		  tip='A nickname that may be used in other tables to refer
 		       to this taping. If nick is empty or not specified,
 		       nick = name.' />
-      <column  col='3' cue='wide'  name='Tape Width'      fmt='f'
+      <column  col='3' cue='wide'  name='Tape Width'      fmt='f' val='0'
 		  tip='Tape Width, mm, typically 8, 12, or 16 mm' />
-      <column  col='4' cue='high'  name='Tape High'       fmt='f'
+      <column  col='4' cue='high'  name='Tape High'       fmt='f' val='0'
 		  tip='Tape Height, mm - the height at which an
 		       overhang projection should begin.' />
-      <column  col='5' cue='oh1'   name='Overhang1'       fmt='f'
+      <column  col='5' cue='oh1'   name='Overhang1'       fmt='f' val='0'
 		  tip='First (left-side) overhang for constraining tape motion' />
-      <column  col='6' cue='oho'   name='Overhang2'       fmt='f'
+      <column  col='6' cue='oho'   name='Overhang2'       fmt='f' val='0'
 		  tip='Other (right-side) overhang for constraining tape motion' />
-      <column  col='7' cue='oh1a'   name='Over.1 alt'       fmt='f'
+      <column  col='7' cue='oh1a'   name='Over.1 alt'       fmt='f' val='0'
 		  tip='First (left-side) alternate (cutback midsection) overhang' />
-      <column  col='8' cue='ohoa'   name='Over.2 alt'       fmt='f'
+      <column  col='8' cue='ohoa'   name='Over.2 alt'       fmt='f' val='0'
 		  tip='Other (right-side) alternate (cutback midsection) overhang' />
     </columnData>
     
@@ -148,49 +148,53 @@
     -->
     
     <columnData>    <!-- Attributes for rows of `Unit Specs` -->
-      <column  col='00' cue='label' name='Spec-Label'      fmt='s'
+      <column  col='00' cue='label' name='Spec-Label'      fmt='s' val=''
 	       tip='Identifies the style of channel this specification describes.
 	         To use it, click its corresponding `Use` box or row.' />
-      <column  col='01' cue='Use' name='Use'               fmt='r'
+      <column  col='01' cue='Use' name='Use'               fmt='r' val=''
 	       tip='Click a `Use` cell to choose its row as specs
 		    for making units.  This is a `radio button` - only
 		    one row is selected at once.' />
-      <column  col='02' cue='CapWide' name='Cap Width'     fmt='f'
+      <column  col='02' cue='CapWide' name='Cap Width'     fmt='f' val='0'
 	       tip='Overall width of unit; eg 10 to 20 mm; should
 		    exceed PostOD + 2*max(overhangs)' />
-      <column  col='03' cue='CapLen' name='Cap Len'     fmt='f'
+      <column  col='03' cue='CapLen' name='Cap Len'     fmt='f' val='0'
 	       tip='Overall length of unit; eg 50 to 200 mm' />
-      <column  col='04' cue='EndLen' name='Cap End-Len' fmt='f'
+      <column  col='04' cue='EndLen' name='Cap End-Len' fmt='f' val='0'
 	       tip='Lengths of full-width sections at ends of unit;
 		    ie, with full overhangs, no cutouts or setbacks.
 		    Middle section of unit, between full-width parts,
 		    gets setback.' />
-      <column  col='05' cue='PadLen' name='End-padding'    fmt='f'
+      <column  col='050' cue='PadLen' name='End-padding'    fmt='f' val='0'
 	       tip='Extra longitudinal length of cap projection,
 		    beyond the half-circles at ends of legs; eg 5 to
 		    10 mm; for better adhesion during 3D printing' />
-      <column  col='06' cue='Posts' name='Posts'           fmt='i'
+      <column  col='051' cue='Slack' name='Slack'    fmt='f' val='0.12'
+	       tip="Extra channel width (besides specified 8, 12, or
+		    16 mm tape width) so that tape doesn't bind in
+		    channel.  Eg 0.1 to 0.2 mm" />
+      <column  col='06' cue='Posts' name='Posts'           fmt='i' val='0'
 	       tip='Number of posts to produce, eg 2 - 3 - 4' />
-      <column  col='07' cue='PostOffset' name='Post Offset' fmt='f'
+      <column  col='07' cue='PostOffset' name='Post Offset' fmt='f' val='0'
 	       tip='Offset from end-of-unit to centerline of first post' />
-      <column  col='08' cue='PostID' name='Post ID'      fmt='f'
+      <column  col='08' cue='PostID' name='Post ID'      fmt='f' val='0'
 	       tip='Inside diameter (hole diameter) of post' />
-      <column  col='09' cue='PostOD' name='Post OD'      fmt='f'
+      <column  col='09' cue='PostOD' name='Post OD'      fmt='f' val='0'
 	       tip='Outside diameter of post; wall-thickness
 		    of post is (OD-ID)/2' />
-      <column  col='10' cue='LegThik' name='Leg-Thick'     fmt='f'
+      <column  col='10' cue='LegThik' name='Leg-Thick'     fmt='f' val='0'
 	       tip='Thickness of leg cross-section; eg 1-2 mm' />
-      <column  col='11' cue='CapThik' name='Cap-Thick'     fmt='f'
+      <column  col='11' cue='CapThik' name='Cap-Thick'     fmt='f' val='0'
 	       tip='Thickness of cap cross-section; eg 1-2 mm' />
-      <column  col='12' cue='Bridges' name='Bridges'       fmt='i'
+      <column  col='12' cue='Bridges' name='Bridges'       fmt='i' val='0'
 	       tip='This is the number of bridges to produce.
 		    Bridges are narrow strips across the set of parts, to
 		    hold them at correct channel distances while being
 		    fastened down.  Bridges are evenly spaced.' />
-      <column  col='13' cue='BridgeOffset' name='Brg Offset' fmt='f'
+      <column  col='13' cue='BridgeOffset' name='Brg Offset' fmt='f' val='0'
 	       tip='Bridge Offset: distance from end-of-unit to
 		    centerline of first Bridge or last Bridge' />
-      <column  col='14' cue='BridgeWide' name='Brg Width' fmt='f'
+      <column  col='14' cue='BridgeWide' name='Brg Width' fmt='f' val='0'
 	       tip='Bridge Width: width of bridge; eg 3-6 mm' />
       <!--column col='1' cue='' name='' tip='' /-->
     </columnData>
@@ -256,10 +260,10 @@
 	 produce units, whenever the Produce button is clicked. -->
     
     <columnData>    <!-- Attributes for rows of `Units to Make` -->
-      <column  col='t' cue='ttype' name='Tape Type'  fmt='s'
+      <column  col='t' cue='ttype' name='Tape Type'  fmt='s' val=''
 	       tip='Tape-type for adjacent sides of adjacent units.
 		    Use `null` ttype when no-overhang is desired.' />
-      <column  col='v' cue='volRO' name='Unit volume'     fmt='f'
+      <column  col='v' cue='volRO' name='Unit volume'     fmt='f' val='0'
 	       tip= "Rough estimate of part volume with sides from this and
 		     previous row.  Units are ml or cm^3.  This is a read-only
 		     field. Blank or unrecognized names get no volume info." />
@@ -287,7 +291,7 @@
 	 
     <columnData>  <!-- Attributes for rows of `Channel Specs` -->
 
-      <column col='1' cue='item' name='How to use these tables:' fmt='s'
+      <column col='1' cue='item' name='How to use these tables:' fmt='s' val=''
 	   tip='You can scroll through the lines below, for directions
                about how to enter specifications for a set of units to
                make a channel-guide assembly.' />

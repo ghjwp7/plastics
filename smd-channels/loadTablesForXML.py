@@ -48,9 +48,9 @@ from xml.etree import ElementTree
 def ErrorExit(msg, fname):
     sys.stderr.write('\n*** {} {} ***\n'.format(msg, fname))
     sys.exit(0)
-
-def rowProcess(mains, tab, top, colNums, colFmts):
-    rowdat = [None]*len(colNums)
+#---------------------------------------------
+def rowProcess(mains, tab, top, colNums, colFmts, colVals):
+    rowdat = [v for v in colVals] # Copy default values
     attr = top.attrib
     for key in attr.keys():
         try:
@@ -77,21 +77,18 @@ def rowProcess(mains, tab, top, colNums, colFmts):
                 bu.setChecked(False)
         else:
             tab.setItem(ro, co, QTableWidgetItem(txt))
-        
+#---------------------------------------------
 def colProcess(tab, top):
     cols = []
     for col in top:
-        atts = [col.attrib.get(x,None) for x in ['col', 'cue', 'name', 'fmt', 'tip']]
+        atts = [col.attrib.get(x,None) for x in ['col', 'cue', 'name', 'fmt', 'val', 'tip']]
         atts[-1] = re.sub(' +', ' ', atts[-1]) # tip
         cols.append(atts)
 
     cols = sorted(cols)
-    colCues  = [e[1] for e in cols]
-    colNames = [e[2] for e in cols]
-    colFmts  = [e[3] for e in cols]
-    colTips  = [e[4] for e in cols]
-    return colCues, colNames, colFmts, colTips
-
+    # Return: colCues, colNames, colFmts, colVals, colTips
+    return ([e[i] for e in cols] for i in range(1,6))
+#---------------------------------------------
 def makeTable(mains, tabN, tbase):
     #print ('Making table {}'.format(tabN))
     styleBlob, rowSet, tWide, tHi, tName, tCue = '', [], 100, 100, '?', '?'
@@ -105,7 +102,7 @@ def makeTable(mains, tabN, tbase):
     tab = None
     for elt in tbase:
         if elt.tag=='columnData':
-            colCues, colNames, colFmts, colTips = colProcess(tab, elt)
+            colCues, colNames, colFmts, colVals, colTips = colProcess(tab, elt)
             tab = QTableWidget(0, len(colNames), mains)
             tab.setHorizontalHeaderLabels(colNames)
             colOrder = {}
@@ -130,23 +127,24 @@ def makeTable(mains, tabN, tbase):
     elif tabN=='2':  mains.tab2 = tab
     elif tabN=='3':  mains.tab3 = tab
     elif tabN=='4':  mains.tab4 = tab
+    elif tabN=='5':  mains.tab5 = tab
 
     for elt in tbase:
         if elt.tag=='row':
-            rowSet.append(rowProcess(mains, tab, elt, colOrder, colFmts))
+            rowSet.append(rowProcess(mains, tab, elt, colOrder, colFmts, colVals))
         elif elt.tag=='style':
             styleBlob += elt.attrib.get('part',None)
     if styleBlob:
         tab.setStyleSheet(styleBlob)
     tab.resizeColumnsToContents()
-
+#---------------------------------------------
 def makeTables(mains, etree): # Make tables per data from XML tree
     for kid in etree.getroot():
         if kid.tag == 'table':
             tabN = kid.attrib.get('tab', None)
             if tabN != None:
                 makeTable(mains, tabN, kid)
-
+#---------------------------------------------
 def loadData(specsFile):
     # Get param: name of data XML file
     try:                        # Read script from file and parse it
@@ -158,8 +156,7 @@ def loadData(specsFile):
     except:                     # Some unknown error
         ErrorExit('Error while treating', specsFile)
     return etree
-
-##---------------------------------------------
+#---------------------------------------------
 def loadAndShow():
     app = QApplication(sys.argv)    # Create a Qt application, first thing
     mainpanes = QSplitter(Qt.Vertical)

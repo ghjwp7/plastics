@@ -1,6 +1,6 @@
 # Module:  ChannelVars.py
 # Get/Put variables for .xml file ./smd-channels3.xml
-# Generated Mon Mar  4 17:45:47 2019 by ./make-xml-accessors.py
+# Generated Wed Mar  6 15:38:58 2019 by ./make-xml-accessors.py
 def xml_float(s):
     try:
         return float(s)
@@ -82,13 +82,13 @@ class Table2:  # Class: Accessors for a row of tab2 / rails / Unit Specs
     @staticmethod
     def tabName():              return "Unit Specs"
     @staticmethod
-    def colCids():              return ['Label', 'Use', 'CapWide', 'CapLen', 'EndLen', 'PadLen', 'Posts', 'PostOffset', 'PostID', 'PostOD', 'LegThik', 'CapThik', 'Bridges', 'BridgeOffset', 'BridgeWide']
+    def colCids():              return ['Label', 'Use', 'CapWide', 'CapLen', 'EndLen', 'PadLen', 'Slack', 'Posts', 'PostOffset', 'PostID', 'PostOD', 'LegThik', 'CapThik', 'Bridges', 'BridgeOffset', 'BridgeWide']
     @staticmethod
-    def colCues():              return ['label', 'Use', 'CapWide', 'CapLen', 'EndLen', 'PadLen', 'Posts', 'PostOffset', 'PostID', 'PostOD', 'LegThik', 'CapThik', 'Bridges', 'BridgeOffset', 'BridgeWide']
+    def colCues():              return ['label', 'Use', 'CapWide', 'CapLen', 'EndLen', 'PadLen', 'Slack', 'Posts', 'PostOffset', 'PostID', 'PostOD', 'LegThik', 'CapThik', 'Bridges', 'BridgeOffset', 'BridgeWide']
     @staticmethod
-    def colFmts():              return ['s', 'r', 'f', 'f', 'f', 'f', 'i', 'f', 'f', 'f', 'f', 'f', 'i', 'f', 'f']
+    def colFmts():              return ['s', 'r', 'f', 'f', 'f', 'f', 'f', 'i', 'f', 'f', 'f', 'f', 'f', 'i', 'f', 'f']
     @staticmethod
-    def colNames():             return ['Spec-Label', 'Use', 'Cap Width', 'Cap Len', 'Cap End-Len', 'End-padding', 'Posts', 'Post Offset', 'Post ID', 'Post OD', 'Leg-Thick', 'Cap-Thick', 'Bridges', 'Brg Offset', 'Brg Width']
+    def colNames():             return ['Spec-Label', 'Use', 'Cap Width', 'Cap Len', 'Cap End-Len', 'End-padding', 'Slack', 'Posts', 'Post Offset', 'Post ID', 'Post OD', 'Leg-Thick', 'Cap-Thick', 'Bridges', 'Brg Offset', 'Brg Width']
 
     def getLabel(self):         return self.tab.item(self.ro,0).text()
     def putLabel(self, v):      self.tab.item(self.ro,0).setText(str(v))
@@ -102,24 +102,26 @@ class Table2:  # Class: Accessors for a row of tab2 / rails / Unit Specs
     def putEndLen(self, v):     self.tab.item(self.ro,4).setText(str(v))
     def getPadLen(self):        return xml_float(self.tab.item(self.ro,5).text())
     def putPadLen(self, v):     self.tab.item(self.ro,5).setText(str(v))
-    def getPosts(self):         return xml_int(self.tab.item(self.ro,6).text())
-    def putPosts(self, v):      self.tab.item(self.ro,6).setText(str(v))
-    def getPostOffset(self):    return xml_float(self.tab.item(self.ro,7).text())
-    def putPostOffset(self, v): self.tab.item(self.ro,7).setText(str(v))
-    def getPostID(self):        return xml_float(self.tab.item(self.ro,8).text())
-    def putPostID(self, v):     self.tab.item(self.ro,8).setText(str(v))
-    def getPostOD(self):        return xml_float(self.tab.item(self.ro,9).text())
-    def putPostOD(self, v):     self.tab.item(self.ro,9).setText(str(v))
-    def getLegThik(self):       return xml_float(self.tab.item(self.ro,10).text())
-    def putLegThik(self, v):    self.tab.item(self.ro,10).setText(str(v))
-    def getCapThik(self):       return xml_float(self.tab.item(self.ro,11).text())
-    def putCapThik(self, v):    self.tab.item(self.ro,11).setText(str(v))
-    def getBridges(self):       return xml_int(self.tab.item(self.ro,12).text())
-    def putBridges(self, v):    self.tab.item(self.ro,12).setText(str(v))
-    def getBridgeOffset(self):  return xml_float(self.tab.item(self.ro,13).text())
-    def putBridgeOffset(self, v): self.tab.item(self.ro,13).setText(str(v))
-    def getBridgeWide(self):    return xml_float(self.tab.item(self.ro,14).text())
-    def putBridgeWide(self, v): self.tab.item(self.ro,14).setText(str(v))
+    def getSlack(self):         return xml_float(self.tab.item(self.ro,6).text())
+    def putSlack(self, v):      self.tab.item(self.ro,6).setText(str(v))
+    def getPosts(self):         return xml_int(self.tab.item(self.ro,7).text())
+    def putPosts(self, v):      self.tab.item(self.ro,7).setText(str(v))
+    def getPostOffset(self):    return xml_float(self.tab.item(self.ro,8).text())
+    def putPostOffset(self, v): self.tab.item(self.ro,8).setText(str(v))
+    def getPostID(self):        return xml_float(self.tab.item(self.ro,9).text())
+    def putPostID(self, v):     self.tab.item(self.ro,9).setText(str(v))
+    def getPostOD(self):        return xml_float(self.tab.item(self.ro,10).text())
+    def putPostOD(self, v):     self.tab.item(self.ro,10).setText(str(v))
+    def getLegThik(self):       return xml_float(self.tab.item(self.ro,11).text())
+    def putLegThik(self, v):    self.tab.item(self.ro,11).setText(str(v))
+    def getCapThik(self):       return xml_float(self.tab.item(self.ro,12).text())
+    def putCapThik(self, v):    self.tab.item(self.ro,12).setText(str(v))
+    def getBridges(self):       return xml_int(self.tab.item(self.ro,13).text())
+    def putBridges(self, v):    self.tab.item(self.ro,13).setText(str(v))
+    def getBridgeOffset(self):  return xml_float(self.tab.item(self.ro,14).text())
+    def putBridgeOffset(self, v): self.tab.item(self.ro,14).setText(str(v))
+    def getBridgeWide(self):    return xml_float(self.tab.item(self.ro,15).text())
+    def putBridgeWide(self, v): self.tab.item(self.ro,15).setText(str(v))
 
     @staticmethod          #    Column #   Format     Id           Column-name 
     def colLabel():        return  0   #      s     Label          Spec-Label
@@ -134,23 +136,25 @@ class Table2:  # Class: Accessors for a row of tab2 / rails / Unit Specs
     @staticmethod
     def colPadLen():       return  5   #      f     PadLen         End-padding
     @staticmethod
-    def colPosts():        return  6   #      i     Posts          Posts
+    def colSlack():        return  6   #      f     Slack          Slack
     @staticmethod
-    def colPostOffset():   return  7   #      f     PostOffset     Post Offset
+    def colPosts():        return  7   #      i     Posts          Posts
     @staticmethod
-    def colPostID():       return  8   #      f     PostID         Post ID
+    def colPostOffset():   return  8   #      f     PostOffset     Post Offset
     @staticmethod
-    def colPostOD():       return  9   #      f     PostOD         Post OD
+    def colPostID():       return  9   #      f     PostID         Post ID
     @staticmethod
-    def colLegThik():      return 10   #      f     LegThik        Leg-Thick
+    def colPostOD():       return 10   #      f     PostOD         Post OD
     @staticmethod
-    def colCapThik():      return 11   #      f     CapThik        Cap-Thick
+    def colLegThik():      return 11   #      f     LegThik        Leg-Thick
     @staticmethod
-    def colBridges():      return 12   #      i     Bridges        Bridges
+    def colCapThik():      return 12   #      f     CapThik        Cap-Thick
     @staticmethod
-    def colBridgeOffset(): return 13   #      f     BridgeOffset   Brg Offset
+    def colBridges():      return 13   #      i     Bridges        Bridges
     @staticmethod
-    def colBridgeWide():   return 14   #      f     BridgeWide     Brg Width
+    def colBridgeOffset(): return 14   #      f     BridgeOffset   Brg Offset
+    @staticmethod
+    def colBridgeWide():   return 15   #      f     BridgeWide     Brg Width
 
 class Table3:  # Class: Accessors for a row of tab3 / makes / Units to Make
     def __init__(self,tab,ro):  self.tab, self.ro = tab, ro
