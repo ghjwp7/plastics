@@ -169,7 +169,7 @@
 	       tip='Extra longitudinal length of cap projection,
 		    beyond the half-circles at ends of legs; eg 5 to
 		    10 mm; for better adhesion during 3D printing' />
-      <column  col='051' cue='Slack' name='Slack'    fmt='f' val='0.12'
+      <column  col='051' cue='Slack' name='Slack'    fmt='f' val='0.1'
 	       tip="Extra channel width (besides specified 8, 12, or
 		    16 mm tape width) so that tape doesn't bind in
 		    channel.  Eg 0.1 to 0.2 mm" />
@@ -196,7 +196,9 @@
 		    centerline of first Bridge or last Bridge' />
       <column  col='14' cue='BridgeWide' name='Brg Width' fmt='f' val='0'
 	       tip='Bridge Width: width of bridge; eg 3-6 mm' />
-      <!--column col='1' cue='' name='' tip='' /-->
+      <column  col='14' cue='Output' name='Output' fmt='s' val='ELPR'
+	       tip='Letters E, L, P, R when present enable production of
+		    Endcurves, Legs, Posts, Rampfills' />
     </columnData>
     
     <row label='lean'  Use=''  BridgeOffset='13' BridgeWide='4' Bridges='0'

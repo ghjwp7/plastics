@@ -39,11 +39,14 @@ class RailData:                 # Specs for channel-rail
         self.CapWide     = rtab.getCapWide()
         self.EndLen      = rtab.getEndLen()
         self.PadLen      = rtab.getPadLen()
+        self.Slack       = rtab.getSlack()
         self.Bridges     = rtab.getBridges()
         self.BridgeOffset= rtab.getBridgeOffset()
         self.BridgeWide  = rtab.getBridgeWide()
+        self.Output      = rtab.getOutput()
         self.eps         = eps
         self.railOk = True
+        #self.      = rtab.get()
 #-------------------------------------------------- 
 class TapeData:                 # Specs for one tape-type
     '''Get data for one tape type from tapes table, and put into a
@@ -193,7 +196,7 @@ def cappedCube(leng, wide, hi, transl):
     ci = forward(wide/2)(cylinder(d=wide, h=hi))
     return translate(transl)(cu + ci + right(leng)(ci))
 #--------------------------------------------------
-def makeLegs(rail, tapeA, tapeB, maxHi): 
+def makeLegs(rail, tapeA, tapeB, maxHi, oLegs, oRamps): 
     '''Make legs based on specs in params - overall x size from rail, y
     overhang sizes from tapeA & B, z heights from maxHi and from tapeA
     & B heights.  Add filler along rail when maxHi > A or B heights:
@@ -225,24 +228,34 @@ def makeLegs(rail, tapeA, tapeB, maxHi):
     cutLen = CapLen - 2*EndLen
     cutR = rampSide(cutLen, tapeA.oho-tapeA.ohoa+eps, maxHi+CapThik+eps, [EndLen, tapeA.ohoa-eps/2, -eps/2], -90)
     cutL = rampSide(cutLen, tapeB.oh1-tapeB.oh1a+eps, maxHi+CapThik+eps, [EndLen, CapWide+tapeB.oh1a-tapeB.oh1-eps/2, -eps/2], 90)
-    return color(Green)(legOut-legIn+chanA+chanB), color(Red)(cutR)+color(Magenta)(cutL)
+    if oLegs:
+        lera = legOut-legIn+chanA+chanB if oRamps else legOut-legIn
+    else:
+        lera = chanA+chanB if oRamps else None
+    if lera: lera = color(Green)(lera)
+    return lera, color(Red)(cutR)+color(Magenta)(cutL)
 #--------------------------------------------------
 def makeUnit(rail, tapeA, tapeB, maxHi):
     '''Make a unit based on rail length-and-width specs in rail, and tape
     specs in tapeA, tapeB.'''
+    oEnds, oLegs, oPosts, oRamps = (c in rail.Output for c in 'ELPR')
     eps     = rail.eps
     EndLen  = rail.EndLen
     CapLen  = rail.CapLen
     CapWide = rail.CapWide
     CapThik = rail.CapThik
     PostStep   = (CapLen-2*rail.PostOffset)/max(1,rail.nPosts-1)
-    cap = cappedCube(CapLen-CapWide, CapWide, CapThik,[CapWide/2,0,0])
-    legs, cutout = makeLegs(rail, tapeA, tapeB, maxHi)
-    asm = cap + legs - cutout
+    if oEnds:
+        cap = cappedCube(CapLen-CapWide, CapWide, CapThik,[CapWide/2,0,0])
+    else:
+        cap = cube([CapLen, CapWide, CapThik])
+    legs, cutout = makeLegs(rail, tapeA, tapeB, maxHi, oLegs, oRamps)
+    asm = cap + legs - cutout if legs else cap
     px = rail.PostOffset
-    for pn in range(rail.nPosts):          # Add set of posts
-        asm += makeTube(rail.PostID, rail.PostOD, CapThik+maxHi, [px, rail.CapWide/2, 0], 0, rail.eps)
-        px  += PostStep
+    if oPosts:
+        for pn in range(rail.nPosts):          # Add set of posts
+            asm += makeTube(rail.PostID, rail.PostOD, CapThik+maxHi, [px, rail.CapWide/2, 0], 0, rail.eps)
+            px  += PostStep
     return asm
 #--------------------------------------------------
 def produceOutput(mains):
@@ -251,10 +264,11 @@ def produceOutput(mains):
     tapes = getTapeDataList(mains)
     # Find max leg height, and span across all units
     maxHi = 0
-    span = -rail.CapWide - tapes[0].wide - tapes[-1].wide - tapes[0].oho - tapes[-1].oh1
+    unwide = tapes[0].wide + tapes[-1].wide + 2*rail.Slack
+    span = -rail.CapWide - unwide - tapes[0].oho - tapes[-1].oh1
     for tt in tapes:
         maxHi = max(maxHi, tt.high)
-        span += rail.CapWide + tt.wide - tt.oh1 - tt.oho
+        span += rail.CapWide + tt.wide + rail.Slack - tt.oh1 - tt.oho
     print ('Span across {} units is {:<0.2f}'.format(len(tapes)-1, span))
 
     # Make bridges
@@ -264,13 +278,12 @@ def produceOutput(mains):
     sideA = tapes[0]
     for sideB in tapes[1:]:
         c = makeUnit(rail, sideA, sideB, maxHi)
-        # need to change 2 in next line to tape-width
-        chanDel = sideA.wide-sideA.oh1-sideA.oho
-        asm = (c + back(rail.CapWide+chanDel)(asm)) if asm else c
+        openChan = sideA.wide + rail.Slack - sideA.oh1 - sideA.oho
+        asm = (c + back(rail.CapWide+openChan)(asm)) if asm else c
         sideA = sideB
     if bridgeAsm:
         asm += bridgeAsm
-    cylSegments = 60
+    cylSegments = 44
     cylSet_fn = '$fn = {};'.format(cylSegments)
     asmFile = 'channel-asm{}.scad'.format(version)
     scad_render_to_file(asm, asmFile, file_header=cylSet_fn, include_orig_code=False)
