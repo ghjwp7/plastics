@@ -111,7 +111,6 @@ def calcVols(mains):
     nro  = tab3.rowCount()
     vols = ['']*nro
     tapes = getTapeDataList(mains)
-    #print 'tapes:', tapes
     if not tapes: return
     sl = tapes[0]               # Get first-row accessors
     for sr in tapes[1:]:        # Get next-row accessors
@@ -128,7 +127,6 @@ def calcVols(mains):
         # Compute total approx volume, converting mm^3 to mL
         evol = '{:1.2f}'.format((CapVol+LegVol+PilVol)/1000) # 1000 mm^3 per mL
         # Put computed value in list
-        #print 'sr.rof={}   evol={}  vols={}'.format(sr.rof, evol, vols)
         vols[sr.rof] = evol
         sl = sr
     # Push computed values into table
@@ -291,7 +289,7 @@ def produceOutput(mains):
 #--------------------------------------------------
 if __name__ == '__main__':
     version = 4    
-    print 'Program:  Make SMD Channels with Qt & SolidPython.  jiw - Feb 2019'
+    print ('Program:  Make SMD Channels with Qt & SolidPython.  jiw - Feb 2019')
     # Link callbacks to volume-updater and scad-output routines
     CallData.setProducers([calcVols, produceOutput])
     # Load up .xml and run the app

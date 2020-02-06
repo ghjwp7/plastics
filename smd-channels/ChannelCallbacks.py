@@ -71,7 +71,6 @@ class CallData:
         ro = Row number of cell whose contents changed
         co = Col number of cell whose contents changed    
         '''
-        #print ('Cell {},{} in tab{} changed to {}'.format(ro,co,tabN,tab.item(ro,co).text()))
         # Don't re-calc when calcVols changes Vol entries
         if tab.tabCue != 'makes' or co != Table3.colVolRO():
             c.calcVols(mains)
@@ -99,15 +98,12 @@ class CallData:
         mTabs  = [mains.tab1, mains.tab2, mains.tab3, mains.tab4 ]
         mClass = [Table1, Table2, Table3, Table4]
         for et, mt, mc in zip(eTabs, mTabs, mClass):
-            #print '{}  {}'.format(et, et.items())
             for ro, ero in enumerate(et.findall('row')):
-                #print '  {}  {}'.format(ero, ero.items())
                 for co, mk in enumerate(mc.colCues()):
                     if mc.colFmts()[co]=='r':
                         mv = '*' if mt.cellWidget(ro,co).isChecked() else ''
                     else:
                         mv = mt.item(ro,co).text() # Get value from table
-                    #print 'Copy t{} {},{}  {}'.format(mc.tabN(),ro,co,mv)
                     ero.set(mk, mv) # Copy table's value into etree 
 
         print ('\nWriting tables to file:\n    {}'.format(name))
