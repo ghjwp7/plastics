@@ -1,5 +1,7 @@
+*.pdf
 *.pyc
 *.scad
 *.gcode
 *.stl
 xyz
+test*py
