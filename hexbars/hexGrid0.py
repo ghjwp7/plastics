@@ -129,9 +129,9 @@ def produceOut(code, numbers, LO):
             y, z = by, bz
             for rr in range(r):
                 x, roLen = bx, c
-                if code=='T':   # Is array triangular?
-                    if (rr&1)==1: roLen += 1
-                    x = bx - dx/2
+                # For odd rows of triangular arrays, offset the row
+                if code=='T' and (rr&1)==1:
+                    x, roLen = bx - dx/2, c+1
                 for cc in range(roLen):
                     posts.append(Point(x,y,z))
                     x += dx
@@ -224,8 +224,9 @@ layout0=layout1=layout2=layout3='''C 0,0,0;
 P5,1,0;
 P6,1.3,30;
 P7,1.5,23;
-B2,.5,.2;  R5,5,.1,.1;
-B-2,.5,.2; T7,6,.12,.06;
+B1.5,.5,-.2;   R5,5,.1,.1;
+B-2,.5,.3;     T7,6,.1,.0866;
+B-.5,-.5,-.5;  L10 .1, .1, .1;
 '''
 design0 = Design(layout0, specs0)
 design1 = Design(layout1, specs1)
