@@ -26,7 +26,7 @@ visualization of arrangements of edges in geodesic dome structures.'''
 #  diameters of 6 and 2 units; and 100-unit scale factor.
 
 #  Note, if the first parameter is a valid integer k (or blank, ie
-#  k=0) hexGrid uses the k'th built-in script set for layout and
+#  k=0) pipeVue uses the k'th built-in script set for layout and
 #  cylinders.  Else, the first parameter should be the name of a file
 #  containing a layout script and a cylinders script.
 
@@ -37,7 +37,7 @@ visualization of arrangements of edges in geodesic dome structures.'''
 
 # When modifying this code:
 # (a) At outset (ie once only), at command prompt say:
-#           V=0;  SCF=hexGrid$V.scad;  PYF=${SCF%.scad}.py
+#           V=0;  SCF=pipeVue$V.scad;  PYF=${SCF%.scad}.py
 #           STF=${SCF%.scad}.stl; exec-on-change $PYF "python3 $PYF" &
 #           echo $PYF, $SCF, $STF;  openscad $SCF &
 #     [To avoid a 'Text file busy' shell error message, instead of
@@ -66,26 +66,24 @@ Point  = namedtuple('Point',  'x,y,z')
 Design = namedtuple('Design', 'pLayout, cSpec')
 Layout = namedtuple('Layout', 'BP, posts')
 
-posts = []
-
 def rotate2(a,b,theta):
     st = sin(theta)
     ct = cos(theta)
     return  a*ct-b*st, a*st+b*ct
 
-def produceOut(code, numbers, LO):
+def produceOut(code, numText, LO):
     BP, posts = LO.BP, LO.posts
     bx, by, bz = BP.x, BP.y, BP.z
-    nn = len(numbers)
+    nn = len(numText)
     def getNums(j, k):
         nums = []
         try:
             if j > nn or nn > k :
                 raise ValueError;
-            for ns in numbers:
+            for ns in numText:
                 nums.append(float(ns))
         except ValueError:
-            print (f'Anomaly: code {code}, numbers {numbers}')
+            print (f'Anomaly: code {code}, {numText} has wrong count or format')
             return None
         return nums
     
@@ -100,6 +98,8 @@ def produceOut(code, numbers, LO):
                 x, y, z = nums[0]+bx,  nums[1]+by, nums[2]+bz
                 posts.append(Point(x,y,z))
                 nums = nums[3:]
+            if len(nums)>0:
+                print (f'Anomaly: code {code}, {numText} has {nums} left over')
             return Layout(BP, posts)
 
     if code=='L':               # Create a line of posts
@@ -160,23 +160,18 @@ def doLayout(dz):
         
     # Now LO has an unscaled points list.  Create and return CSG
     posts = LO.posts
-    #print(f'\nline 162: scale & make,   posts={posts}, len()={len(posts)}')
     for k in range(len(posts)):
         p = posts[k]
         posts[k] = Point(SF*p.x, SF*p.y, SF*p.z)
-    #print(f'\nline 166:  len(posts) {len(posts)}')
     assembly = None
     for p in posts:        
         tube = cylinder(d=qDiam, h=poHi)
         cyli = translate([p.x, p.y, p.z])(tube)
         assembly = assembly + cyli if assembly else cyli
-    
-    #print(f'\nline 173:  dz {dz},  LO.BP {LO.BP},   len(posts) {len(posts)}')
     return assembly, Layout(LO.BP, posts)
 
 def doCylinders(dz, LO, assembly):
     specs, posts = dz.cSpec, LO.posts
-    #print(f'\nline 178: posts {posts}, dz {dz}')
     colorr='G'; thix='p'; pc = None
     post1, post2, level1, level2 = '0', '1', 'c','c'
     colors, levels, digits = 'GYRBCM', 'abcde', '01234356789'
@@ -193,7 +188,6 @@ def doCylinders(dz, LO, assembly):
             if pc in digits:  post2 = post2 + c
             else:             post1, post2 = post2, c
         elif c==';':
-            #print(f'\nline 195: post1,post2 {post1},{post2}, nPosts {nPosts}, dz {dz}')
             m, n = int(post1)%nPosts, int(post2)%nPosts
             p, q = posts[m], posts[n]
             za1 = (ord(level1)-loLevel)*deltaHi
@@ -215,6 +209,32 @@ def doCylinders(dz, LO, assembly):
         pc = c
     return assembly
 
+def loadScriptFile(fiName):
+    '''Read a layout script and a cylinders script from a file'''
+    mode = 0;                   # Start out in comments mode
+    los = cs = ''               # Start with empty scripts
+    with open(fiName) as fi:
+        for line in fi:
+            ll = len(line)
+            if mode==0:         # In comments mode?
+                if ll>1 and line[0]=='=':
+                    if line[1]=='L': # Got a Layout Script ?
+                        mode = 1
+                    if line[1]=='C': # Got a Cylinder Script ?
+                        mode = 2
+            elif mode==1:
+                if ll>1 and line[0]=='=' and line[1]=='C':
+                    mode = 2
+                else:
+                    los = los + line
+            elif mode==2:
+                if ll>1 and line[0]=='=' and line[1]=='L':
+                    mode = 2
+                else:
+                    cs = cs + line
+    # Having read in and then closed a file, return a Design
+    return Design(los, cs)
+    
 specs0 = 'Gpae 0 1;C2;3;4;5;1; Rqaa2;3;4;5;1; Mqee2;3;4;5;1; Ypae 6 7;8;9;G10;11;R6;Yea 12 13;G14;15;16;17;18;C12;'
 specs1 = 'Gp 0a1e; Rp 1a2a; Cq 3;c4c;p a5e;a6e;Ma1e;2ab;e3;ae4; 5 ; 6;'
 specs2 = 'pae B0 1;G2;R3;Y4;C5;M6;G7;Y1; qea G2;R3;Y4;C5;M6;G7;Y1;'
@@ -234,18 +254,31 @@ design2 = Design(layout2, specs2)
 design3 = Design(layout3, specs3)
 designs = (design0, design1, design2, design3)
 
+# Return 2 values, ival and fval (integer and float), using defVal as
+# the result to return if not len(argv)>arn, and badCode as the result
+# to return if conversion fails.
+def getArg(arn, defVal, badCode):
+    if len(argv)>arn:
+        try:    ival = int(argv[arn])
+        except: ival = badCode
+        try:    fval = float(argv[arn])
+        except: fval = badCode
+        return ival, fval
+    else: return defVal, defVal
+
 if __name__ == '__main__': 
     arn = 0   # Get params:
-    arn+=1; deNum = int(argv[arn])   if len(argv)>arn else 0
-    arn+=1; eGap  = float(argv[arn]) if len(argv)>arn else 3
-    arn+=1; poHi  = float(argv[arn]) if len(argv)>arn else 16
-    arn+=1; pDiam = float(argv[arn]) if len(argv)>arn else 6
-    arn+=1; qDiam = float(argv[arn]) if len(argv)>arn else 2
-    arn+=1; SF    = float(argv[arn]) if len(argv)>arn else 100
+    arn+=1; deNum, dc  = getArg(arn, 0,    None)
+    arn+=1; dc,  eGap  = getArg(arn, 0.03, 0.03)
+    arn+=1; dc,  poHi  = getArg(arn, 0.16, 0.16)
+    arn+=1; dc,  pDiam = getArg(arn, 0.06, 0.06)
+    arn+=1; dc,  qDiam = getArg(arn, 0.02, 0.02)
+    arn+=1; dc,  SF    = getArg(arn, 100,  100)
+    eGap, poHi, pDiam, qDiam = eGap*SF, poHi*SF, pDiam*SF, qDiam*SF
     cylSegments = 30
     version = 0
-    asmFile = f'hexGrid{version}.scad'
-    dz = designs[min(deNum, len(cases)-1)]
+    asmFile = f'pipeVue{version}.scad'
+    dz = designs[min(deNum, len(cases)-1)] if deNum != None else loadScriptFile(argv[1])
     #assembly = makePosts(dz)
     assembly, LO = doLayout(dz)
     assembly = doCylinders(dz, LO, assembly)
