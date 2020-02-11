@@ -246,11 +246,14 @@ def loadScriptFile(fiName):
 specs0 = 'Gpae 1,2; 2,3; 3,4; 4,5; 5,1;"'
 specs1 = 'Gpae 1,2;3;4;5;1;'
 specs2 = 'Gpae 1,2;;;;1;'
+specs3 = 'Gpae 1,2;;;;1; R6,2;;;;10,1; Y1,6;;;;; B11,6;;;;; C6,12;;;;10,11; M1,11;;;;; 0,1;0,2;0,3;0,4;0,5;'
 layout0=layout1=layout2='C 0,0,0; P5,1,0;'
+layout3= 'C 0,0,0; P5,1,0; P5,1.6,36; P5,2,0;'
 design0 = Design(layout0, specs0)
 design1 = Design(layout1, specs1)
 design2 = Design(layout2, specs2)
-designs = (design0, design1, design2)
+design3 = Design(layout3, specs3)
+designs = (design0, design1, design2, design3)
 
 # Return 2 values, ival and fval (integer and float), using defVal as
 # the result to return if not len(argv)>arn, and badCode as the result
