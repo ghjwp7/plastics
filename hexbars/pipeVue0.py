@@ -179,15 +179,22 @@ def doCylinders(dz, LO, assembly):
     nPosts = len(posts)
     deltaHi = poHi/(len(levels)-1)
     loLevel = ord(levels[0])
-    for c in specs:
-        if c in colors: colorr = c
-        elif c in 'pq' : thix  = c
-        elif c in levels:
-            level1, level2 = level2, c
-        elif c in digits:
-            if pc in digits:  post2 = post2 + c
-            else:             post1, post2 = post2, c
-        elif c==';':
+    noPL = True
+    for cc in specs:
+        if cc in colors: colorr = cc
+        elif cc in 'pq' : thix  = cc
+        elif cc in levels:
+            level1, level2 = level2, cc
+            noPL = False
+        elif cc in digits:
+            if pc in digits:  post2 = post2 + cc
+            else:             post1, post2 = post2, cc
+            noPL = False
+        elif cc=='/':
+            level1, level2 = level2, level1
+        elif cc==';':
+            if noPL:
+                post1, post2 = str(1+int(post1)), str(1+int(post2))
             m, n = int(post1)%nPosts, int(post2)%nPosts
             p, q = posts[m], posts[n]
             za1 = (ord(level1)-loLevel)*deltaHi
@@ -206,7 +213,8 @@ def doCylinders(dz, LO, assembly):
             tilt = rotate([0,yAxisAngle,zAxisAngle])(colo)
             cyli = translate([bx,by,bz])(tilt)
             assembly = assembly + cyli if assembly else cyli
-        pc = c
+            noPL = True
+        pc = cc
     return assembly
 
 def loadScriptFile(fiName):
@@ -235,22 +243,14 @@ def loadScriptFile(fiName):
     # Having read in and then closed a file, return a Design
     return Design(los, cs)
     
-specs0 = 'Gpae 0 1;C2;3;4;5;1; Rqaa2;3;4;5;1; Mqee2;3;4;5;1; Ypae 6 7;8;9;G10;11;R6;Yea 12 13;G14;15;16;17;18;C12;'
-specs1 = 'Gp 0a1e; Rp 1a2a; Cq 3;c4c;p a5e;a6e;Ma1e;2ab;e3;ae4; 5 ; 6;'
-specs2 = 'pae B0 1;G2;R3;Y4;C5;M6;G7;Y1; qea G2;R3;Y4;C5;M6;G7;Y1;'
-specs3 = 'qCab0,1;c;d;e;'
-cases = ((5, 6, specs0), (6,7,specs1), (7,8,specs2), (5,6,specs3))
-layout0='C 0,0,0; P5,1,0; P6,1.3,30; P7,1.5,23;'
-layout1='''B0.8,.5,-.2;   R5,5,.1,.1; 
-B-0.8,.5,.3;   T7,6,.1,.0866;
-B-.5,-.5,-.5;  L10 .1, .1, .1; '''
-layout2='C 0,0,0; P6,1,0; P6,1.3,30; P6,1.5,0'
-layout3='B0,0,-.3; R5,5,.1,.1;'
+specs0 = 'Gpae 1,2; 2,3; 3,4; 4,5; 5,1;"'
+specs1 = 'Gpae 1,2;3;4;5;1;'
+specs2 = 'Gpae 1,2;;;;1;'
+layout0=layout1=layout2='C 0,0,0; P5,1,0;'
 design0 = Design(layout0, specs0)
 design1 = Design(layout1, specs1)
 design2 = Design(layout2, specs2)
-design3 = Design(layout3, specs3)
-designs = (design0, design1, design2, design3)
+designs = (design0, design1, design2)
 
 # Return 2 values, ival and fval (integer and float), using defVal as
 # the result to return if not len(argv)>arn, and badCode as the result
@@ -276,7 +276,7 @@ if __name__ == '__main__':
     cylSegments = 30
     version = 0
     asmFile = f'pipeVue{version}.scad'
-    dz = designs[min(deNum, len(cases)-1)] if deNum != None else loadScriptFile(argv[1])
+    dz = designs[min(deNum, len(designs)-1)] if deNum != None else loadScriptFile(argv[1])
     #assembly = makePosts(dz)
     assembly, LO = doLayout(dz)
     assembly = doCylinders(dz, LO, assembly)
