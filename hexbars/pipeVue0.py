@@ -240,14 +240,12 @@ specs1 = 'Gp 0a1e; Rp 1a2a; Cq 3;c4c;p a5e;a6e;Ma1e;2ab;e3;ae4; 5 ; 6;'
 specs2 = 'pae B0 1;G2;R3;Y4;C5;M6;G7;Y1; qea G2;R3;Y4;C5;M6;G7;Y1;'
 specs3 = 'qCab0,1;c;d;e;'
 cases = ((5, 6, specs0), (6,7,specs1), (7,8,specs2), (5,6,specs3))
-layout0=layout1=layout2=layout3='''C 0,0,0;
-P5,1,0;
-P6,1.3,30;
-P7,1.5,23;
-B1.5,.5,-.2;   R5,5,.1,.1;
-B-2,.5,.3;     T7,6,.1,.0866;
-B-.5,-.5,-.5;  L10 .1, .1, .1;
-'''
+layout0='C 0,0,0; P5,1,0; P6,1.3,30; P7,1.5,23;'
+layout1='''B0.8,.5,-.2;   R5,5,.1,.1; 
+B-0.8,.5,.3;   T7,6,.1,.0866;
+B-.5,-.5,-.5;  L10 .1, .1, .1; '''
+layout2='C 0,0,0; P6,1,0; P6,1.3,30; P6,1.5,0'
+layout3='B0,0,-.3; R5,5,.1,.1;'
 design0 = Design(layout0, specs0)
 design1 = Design(layout1, specs1)
 design2 = Design(layout2, specs2)
