@@ -119,7 +119,7 @@ def produceOut(code, numText, LO):
             theta = 2*pi/n
             x, y = rotate2(r, 0, a0*pi/180) # a0 in degrees
             for post in range(n):
-                posts.append(Point(x,y,0))
+                posts.append(Point(x,y,bz))
                 x, y = rotate2(x, y,theta)
     
     if code in 'RT':            # Create an array of posts
@@ -174,15 +174,15 @@ def doCylinders(dz, LO, assembly):
     specs, posts = dz.cSpec, LO.posts
     colorr='G'; thix='p'; pc = None
     post1, post2, level1, level2 = '0', '1', 'c','c'
-    colors, levels, digits = 'GYRBCM', 'abcde', '01234356789'
-    colorSet = dict({'G':'Green', 'Y':'Yellow', 'R':'Red', 'B':'Blue', 'C':'Cyan', 'M':'Magenta'})
+    colors, levels, digits = 'GYRBCMW', 'abcde', '01234356789'
+    colorSet = dict({'G':'Green', 'Y':'Yellow', 'R':'Red', 'B':'Blue', 'C':'Cyan', 'M':'Magenta', 'W':'White'})
     nPosts = len(posts)
     deltaHi = poHi/(len(levels)-1)
     loLevel = ord(levels[0])
     noPL = True
     for cc in specs:
         if cc in colors: colorr = cc
-        elif cc in 'pq' : thix  = cc
+        elif cc in 'pqr' : thix  = cc
         elif cc in levels:
             level1, level2 = level2, cc
             noPL = False
@@ -208,7 +208,8 @@ def doCylinders(dz, LO, assembly):
             print (f'Make  {cName:8} {thix} {m:2}{level1} {n:2}{level2}   Length {L:2.2f}')
             yAxisAngle = (pi/2 - asin(dz/L)) * 180/pi
             zAxisAngle =  atan2(dy, dx)      * 180/pi
-            tube = cylinder(d=pDiam if thix=='p' else qDiam, h=L-2*eGap)
+            diam = rDiam if thix=='r' else qDiam if thix=='q' else pDiam
+            tube = cylinder(d=diam, h=L-2*eGap)
             colo = color(cName)(tube)
             tilt = rotate([0,yAxisAngle,zAxisAngle])(colo)
             cyli = translate([bx,by,bz])(tilt)
@@ -275,7 +276,9 @@ if __name__ == '__main__':
     arn+=1; dc,  pDiam = getArg(arn, 0.06, 0.06)
     arn+=1; dc,  qDiam = getArg(arn, 0.02, 0.02)
     arn+=1; dc,  SF    = getArg(arn, 100,  100)
-    eGap, poHi, pDiam, qDiam = eGap*SF, poHi*SF, pDiam*SF, qDiam*SF
+    eGap, poHi = eGap*SF, poHi*SF
+    rDiam = 2*pDiam
+    pDiam, qDiam, rDiam = pDiam*SF, qDiam*SF, rDiam*SF
     cylSegments = 30
     version = 0
     asmFile = f'pipeVue{version}.scad'
