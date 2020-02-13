@@ -55,7 +55,7 @@ visualization of arrangements of edges in geodesic dome structures.'''
 # (c) In openscad, press F6 to render details, then Export, as STL.
 # (d) Say `craftware $STF &` then slice it and save gcode
 
-from solid import cylinder, translate, rotate, scad_render_to_file, color
+from solid import cylinder, translate, rotate, scad_render_to_file, color, text
 from solid.utils import down, up, left
 from sys import argv
 from math import sqrt, pi, cos, sin, asin, atan2
@@ -143,7 +143,18 @@ def produceOut(code, numText, LO):
                 y += dy
             return Layout(BP, posts)
     return LO                   # No change if we fail or fall thru
-    
+
+def levelLet(lev):
+    deltaHi = SF*postHi/(len(levels)-1)
+    return (ord(lev)-ord(levels[0]))*deltaHi
+
+def thickLet(thix):
+    if thix=='p':
+        return SF*pDiam
+    else: # diameters q, r, s, t... scale geometrically
+        expo = max(0, ord(thix)-ord('q'))
+        return SF * qDiam * pow(dRatio,expo)
+        
 def doLayout(dz):
     LO = Layout(Point(0,0,0), [])
     pc, code, numbers = '?', '?', []
@@ -167,24 +178,34 @@ def doLayout(dz):
     posts = LO.posts
     for k in range(len(posts)):
         p = posts[k]
-        posts[k] = Point(SF*p.x, SF*p.y, SF*p.z)
+        p = Point(SF*p.x, SF*p.y, SF*p.z)
+        posts[k] = p
+        if postList:
+            print (f'Post {k:<3}   ( {p.x:8.2f} {p.y:8.2f} {p.z:8.2f}')
     assembly = None
-    for p in posts:        
+    for k, p in enumerate(posts):
         tube = cylinder(d=SF*postDiam, h=SF*postHi)
         cyli = translate([p.x, p.y, p.z])(tube)
         assembly = assembly + cyli if assembly else cyli
+        if postLabel:
+            cName = colorSet['B']
+            thik  = thickLet('t')
+            zd    = levelLet('e')
+            for cc in postLabel:
+                if cc in colors: cName = colorSet[cc]
+                if cc in thixx:  thik  = thickLet(cc)
+                if cc in levels: zd = levelLet(cc)
+            tx =  color(cName)(text(text=str(k),size=thik))
+            tr = translate([p.x-thik*(1+len(str(k))), p.y, zd+p.z])(tx)
+            assembly = assembly + tr
+
     return assembly, Layout(LO.BP, posts)
 
 def doCylinders(dz, LO, assembly):
     specs, posts = dz.cSpec, LO.posts
     colorr='G'; thix='p'; pc = None
     post1, post2, level1, level2 = '0', '1', 'c','c'
-    colors, levels, digits = 'GYRBCMW', 'abcde', '01234356789'
-    thixx = 'pqrstuvw'
-    colorSet = dict({'G':'Green', 'Y':'Yellow', 'R':'Red', 'B':'Blue', 'C':'Cyan', 'M':'Magenta', 'W':'White'})
     nPosts = len(posts)
-    deltaHi = SF*postHi/(len(levels)-1)
-    loLevel = ord(levels[0])
     nonPost = True
     for cc in specs:
         if cc in colors: colorr = cc
@@ -202,21 +223,19 @@ def doCylinders(dz, LO, assembly):
                 post1, post2 = str(1+int(post1)), str(1+int(post2))
             m, n = int(post1)%nPosts, int(post2)%nPosts
             p, q = posts[m], posts[n]
-            za1 = (ord(level1)-loLevel)*deltaHi
-            za2 = (ord(level2)-loLevel)*deltaHi
+            za1 = levelLet(level1)
+            za2 = levelLet(level2)
             pz, qz = za1 + p.z, za2 + q.z
             dx, dy, dz  =  q.x-p.x,  q.y-p.y,  qz-pz
             L = max(0.1, sqrt(dx*dx + dy*dy + dz*dz))
             cName = colorSet[colorr]
             alpha = SF*endGap/L
             bx, by, bz = p.x+alpha*dx, p.y+alpha*dy, pz+alpha*dz
-            print (f'Make  {cName:8} {thix} {m:2}{level1} {n:2}{level2}   Length {L:2.2f}')
+            if cylList:
+                print (f'Make  {cName:8} {thix} {m:2}{level1} {n:2}{level2}   Length {L:2.2f}')
             yAxisAngle = (pi/2 - asin(dz/L)) * 180/pi
             zAxisAngle =  atan2(dy, dx)      * 180/pi
-            if thix=='p':
-                diam = SF*pDiam
-            else: # diameters q, r, s, t... scale geometrically
-                diam = SF*qDiam*pow(dRatio,ord(thix)-ord('q'))
+            diam = thickLet(thix)
             tube = cylinder(d=diam, h=L-SF*2*endGap)
             colo = color(cName)(tube)
             tilt = rotate([0,yAxisAngle,zAxisAngle])(colo)
@@ -277,14 +296,21 @@ def getArg(arn, defVal, badCode):
         except: ival = badCode
         return ival
     else: return defVal
-        
+
+
+colors, levels = 'GYRBCMW',  'abcde'
+thixx,  digits = 'pqrstuvw', '01234356789'
+colorSet = dict({'G':'Green', 'Y':'Yellow', 'R':'Red', 'B':'Blue', 'C':'Cyan', 'M':'Magenta', 'W':'White'})   
+
 if __name__ == '__main__':
     # Set initial values of main parameters
     pDiam,   qDiam,    dRatio   = 0.06, 0.02, sqrt(2)
     endGap,  postHi,   postDiam = 0.03, 0.16, qDiam
     f,       SF,    cylSegments = '', 100, 30
+    version, paramTxt, postLabel= 0, '','Bte' # Blue, size u, level e
+    scadFile = f'pipeVue{version}.scad' # Name of scad output file
+    postList = cylList = False # Control printing of post and cyl data
 
-    version, paramTxt = 0, ''
     for k in range(1,len(argv)):
         paramTxt = paramTxt + ' ' + argv[k]
     installParams(paramTxt)     # Set params from command line
@@ -297,8 +323,7 @@ if __name__ == '__main__':
 
     assembly, LO = doLayout(dz)
     assembly = doCylinders(dz, LO, assembly)
-    asmFile = f'pipeVue{version}.scad'
-    scad_render_to_file(assembly, asmFile,
+    scad_render_to_file(assembly, scadFile,
                         file_header = f'$fn = {cylSegments};',
                         include_orig_code=False)
-    print (f'Wrote scad code to {asmFile}')
+    print (f'Wrote scad code to {scadFile}')
