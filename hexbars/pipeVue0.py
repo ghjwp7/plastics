@@ -18,12 +18,17 @@ visualization of arrangements of edges in geodesic dome structures.'''
 #  elements.  Each semicolon terminator invokes cylinder production.
 
 # Optional params for __main__:
-#    deNum/name, eGap, poHi, pDiam, qDiam, SF
+#    designNum/name, endGap, postHi, pDiam, qDiam, SF
 
-#  The command-line parameters default to deNum=0, eGap=3, poHi=16,
-#  pDiam=6, qDiam=2, and SF=100 respectively, representing design
-#  number 0; 3-unit end gaps; 16-unit post heights; thick and thin
-#  diameters of 6 and 2 units; and 100-unit scale factor.
+# [parameter handling revision, 12 Feb: allow params in any order; but
+# require keyword=value forms -- eg `pDiam=0.07` -- where keyword
+# should exactly match the name of a variable in the program.]
+
+#  The command-line parameters default to designNum=0, endGap=.03,
+#  postHi=.24, pDiam=.06, qDiam=.02, and SF=100 respectively, which
+#  when scaled represent design number 0; 3-unit end gaps; 24-unit
+#  post heights; thick and thin diameters of 6 and 2 units; and
+#  100-unit scale factor.
 
 #  Note, if the first parameter is a valid integer k (or blank, ie
 #  k=0) pipeVue uses the k'th built-in script set for layout and
@@ -31,8 +36,8 @@ visualization of arrangements of edges in geodesic dome structures.'''
 #  containing a layout script and a cylinders script.
 
 #  Note, an end gap is a small gap between a post and a cylinder end.
-#  With eGap=3, a gap of about 6 units is drawn between the ends of
-#  cylinders meeting at the same point.  With eGap=0, there'd be no
+#  With endGap=3, a gap of about 6 units is drawn between the ends of
+#  cylinders meeting at the same point.  With endGap=0, there'd be no
 #  gap.
 
 # When modifying this code:
@@ -119,7 +124,7 @@ def produceOut(code, numText, LO):
             theta = 2*pi/n
             x, y = rotate2(r, 0, a0*pi/180) # a0 in degrees
             for post in range(n):
-                posts.append(Point(x,y,bz))
+                posts.append(Point(bx+x, by+y, bz))
                 x, y = rotate2(x, y,theta)
     
     if code in 'RT':            # Create an array of posts
@@ -165,7 +170,7 @@ def doLayout(dz):
         posts[k] = Point(SF*p.x, SF*p.y, SF*p.z)
     assembly = None
     for p in posts:        
-        tube = cylinder(d=qDiam, h=poHi)
+        tube = cylinder(d=SF*postDiam, h=SF*postHi)
         cyli = translate([p.x, p.y, p.z])(tube)
         assembly = assembly + cyli if assembly else cyli
     return assembly, Layout(LO.BP, posts)
@@ -175,25 +180,25 @@ def doCylinders(dz, LO, assembly):
     colorr='G'; thix='p'; pc = None
     post1, post2, level1, level2 = '0', '1', 'c','c'
     colors, levels, digits = 'GYRBCMW', 'abcde', '01234356789'
+    thixx = 'pqrstuvw'
     colorSet = dict({'G':'Green', 'Y':'Yellow', 'R':'Red', 'B':'Blue', 'C':'Cyan', 'M':'Magenta', 'W':'White'})
     nPosts = len(posts)
-    deltaHi = poHi/(len(levels)-1)
+    deltaHi = SF*postHi/(len(levels)-1)
     loLevel = ord(levels[0])
-    noPL = True
+    nonPost = True
     for cc in specs:
         if cc in colors: colorr = cc
-        elif cc in 'pqr' : thix  = cc
+        elif cc in thixx: thix  = cc
         elif cc in levels:
             level1, level2 = level2, cc
-            noPL = False
         elif cc in digits:
             if pc in digits:  post2 = post2 + cc
             else:             post1, post2 = post2, cc
-            noPL = False
+            nonPost = False
         elif cc=='/':
             level1, level2 = level2, level1
         elif cc==';':
-            if noPL:
+            if nonPost:
                 post1, post2 = str(1+int(post1)), str(1+int(post2))
             m, n = int(post1)%nPosts, int(post2)%nPosts
             p, q = posts[m], posts[n]
@@ -203,58 +208,65 @@ def doCylinders(dz, LO, assembly):
             dx, dy, dz  =  q.x-p.x,  q.y-p.y,  qz-pz
             L = max(0.1, sqrt(dx*dx + dy*dy + dz*dz))
             cName = colorSet[colorr]
-            alpha = eGap/L
+            alpha = SF*endGap/L
             bx, by, bz = p.x+alpha*dx, p.y+alpha*dy, pz+alpha*dz
             print (f'Make  {cName:8} {thix} {m:2}{level1} {n:2}{level2}   Length {L:2.2f}')
             yAxisAngle = (pi/2 - asin(dz/L)) * 180/pi
             zAxisAngle =  atan2(dy, dx)      * 180/pi
-            diam = rDiam if thix=='r' else qDiam if thix=='q' else pDiam
-            tube = cylinder(d=diam, h=L-2*eGap)
+            if thix=='p':
+                diam = SF*pDiam
+            else: # diameters q, r, s, t... scale geometrically
+                diam = SF*qDiam*pow(dRatio,ord(thix)-ord('q'))
+            tube = cylinder(d=diam, h=L-SF*2*endGap)
             colo = color(cName)(tube)
             tilt = rotate([0,yAxisAngle,zAxisAngle])(colo)
             cyli = translate([bx,by,bz])(tilt)
             assembly = assembly + cyli if assembly else cyli
-            noPL = True
+            nonPost = True
         pc = cc
     return assembly
 
+def installParams(parTxt):
+    '''Given a string like "var1=val1 var2=val2 var3=val3 ...", extract
+    the variable names and the values, convert the values to numeric
+    forms, and store the values in the globals() dict.  Note, do not
+    use any white space within any of the var=val strings.    '''
+    plist = parTxt.split()      # Split the list on white space
+    flubs, glob = '', globals()
+    for vev in plist:
+        p = pq = vev.split('=')          # Split each equation on = sign
+        q, ok = '', False
+        if len(pq)==2:
+            p, q = pq
+            if p in glob.keys():
+                t, v = type(glob[p]), q
+                try:
+                    if   t==int:   v = int(q);    ok=True
+                    elif t==float: v = float(q);  ok=True
+                    elif t==str:   v = q;         ok=True
+                except:  pass
+        if ok:
+            glob[p] = v
+        else:  flubs += f' [ {p} {q} ] '
+    if flubs: print (f'Parameter-setting fail: {flubs}')
+
 def loadScriptFile(fiName):
-    '''Read a layout script and a cylinders script from a file'''
+    '''Read parameters, layout script, and cylinders script from file'''
     mode = 0;                   # Start out in comments mode
-    los = cs = ''               # Start with empty scripts
+    pt = los = cs = ''          # Start with empty scripts
     with open(fiName) as fi:
         for line in fi:
-            ll = len(line)
-            if mode==0:         # In comments mode?
-                if ll>1 and line[0]=='=':
-                    if line[1]=='L': # Got a Layout Script ?
-                        mode = 1
-                    if line[1]=='C': # Got a Cylinder Script ?
-                        mode = 2
-            elif mode==1:
-                if ll>1 and line[0]=='=' and line[1]=='C':
-                    mode = 2
-                else:
-                    los = los + line
-            elif mode==2:
-                if ll>1 and line[0]=='=' and line[1]=='L':
-                    mode = 2
-                else:
-                    cs = cs + line
-    # Having read in and then closed a file, return a Design
-    return Design(los, cs)
-    
-specs0 = 'Gpae 1,2; 2,3; 3,4; 4,5; 5,1;"'
-specs1 = 'Gpae 1,2;3;4;5;1;'
-specs2 = 'Gpae 1,2;;;;1;'
-specs3 = 'Gpae 1,2;;;;1; R6,2;;;;10,1; Y1,6;;;;; B11,6;;;;; C6,12;;;;10,11; M1,11;;;;; 0,1;0,2;0,3;0,4;0,5;'
-layout0=layout1=layout2='C 0,0,0; P5,1,0;'
-layout3= 'C 0,0,0; P5,1,0; P5,1.6,36; P5,2,0;'
-design0 = Design(layout0, specs0)
-design1 = Design(layout1, specs1)
-design2 = Design(layout2, specs2)
-design3 = Design(layout3, specs3)
-designs = (design0, design1, design2, design3)
+            ll, l1, l2 = len(line), line[:1], line[:2]
+            if l1 == '=':   # Detect section change vs comment ...
+                if   l2=='=P': mode = 1 # Parameters
+                elif l2=='=L': mode = 2 # Layout
+                elif l2=='=C': mode = 3 # Cylinders
+            else:
+                if   mode==1: pt  = pt  + line
+                elif mode==2: los = los + line
+                elif mode==3: cs  = cs  + line
+    installParams(pt)           # Install params, if any
+    return Design(los, cs)      # Return Design
 
 # Return 2 values, ival and fval (integer and float), using defVal as
 # the result to return if not len(argv)>arn, and badCode as the result
@@ -263,29 +275,29 @@ def getArg(arn, defVal, badCode):
     if len(argv)>arn:
         try:    ival = int(argv[arn])
         except: ival = badCode
-        try:    fval = float(argv[arn])
-        except: fval = badCode
-        return ival, fval
-    else: return defVal, defVal
+        return ival
+    else: return defVal
+        
+if __name__ == '__main__':
+    # Set initial values of main parameters
+    pDiam,   qDiam,    dRatio   = 0.06, 0.02, sqrt(2)
+    endGap,  postHi,   postDiam = 0.03, 0.16, qDiam
+    f,       SF,    cylSegments = '', 100, 30
 
-if __name__ == '__main__': 
-    arn = 0   # Get params:
-    arn+=1; deNum, dc  = getArg(arn, 0,    None)
-    arn+=1; dc,  eGap  = getArg(arn, 0.03, 0.03)
-    arn+=1; dc,  poHi  = getArg(arn, 0.16, 0.16)
-    arn+=1; dc,  pDiam = getArg(arn, 0.06, 0.06)
-    arn+=1; dc,  qDiam = getArg(arn, 0.02, 0.02)
-    arn+=1; dc,  SF    = getArg(arn, 100,  100)
-    eGap, poHi = eGap*SF, poHi*SF
-    rDiam = 2*pDiam
-    pDiam, qDiam, rDiam = pDiam*SF, qDiam*SF, rDiam*SF
-    cylSegments = 30
-    version = 0
-    asmFile = f'pipeVue{version}.scad'
-    dz = designs[min(deNum, len(designs)-1)] if deNum != None else loadScriptFile(argv[1])
-    #assembly = makePosts(dz)
+    version, paramTxt = 0, ''
+    for k in range(1,len(argv)):
+        paramTxt = paramTxt + ' ' + argv[k]
+    installParams(paramTxt)     # Set params from command line
+    
+    if f == '':
+        dz = Design('C 0,0,0; P5,1,0;', 'Gpae 1,2;;;;1;')
+    else:
+        dz = loadScriptFile(f)  # May install params from file.
+    installParams(paramTxt)     # Again, set params from command line.
+
     assembly, LO = doLayout(dz)
     assembly = doCylinders(dz, LO, assembly)
+    asmFile = f'pipeVue{version}.scad'
     scad_render_to_file(assembly, asmFile,
                         file_header = f'$fn = {cylSegments};',
                         include_orig_code=False)
