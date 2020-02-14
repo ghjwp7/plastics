@@ -144,6 +144,11 @@ def produceOut(code, numText, LO):
             return Layout(BP, posts)
     return LO                   # No change if we fail or fall thru
 
+def isTrue(x):
+    '''Return false if x is None, or False, or an empty string, or a
+    string beginning with f, F, N, or n.  Else, return True.    '''
+    return not str(x)[:1] in 'fFNn'
+
 def levelLet(lev):
     deltaHi = SF*postHi/(len(levels)-1)
     return (ord(lev)-ord(levels[0]))*deltaHi
@@ -180,14 +185,14 @@ def doLayout(dz):
         p = posts[k]
         p = Point(SF*p.x, SF*p.y, SF*p.z)
         posts[k] = p
-        if postList:
-            print (f'Post {k:<3}   ( {p.x:8.2f} {p.y:8.2f} {p.z:8.2f}')
+        if isTrue(postList):
+            print (f'Post {k:<3}   ( {p.x:8.2f} {p.y:8.2f} {p.z:8.2f} )')
     assembly = None
     for k, p in enumerate(posts):
         tube = cylinder(d=SF*postDiam, h=SF*postHi)
         cyli = translate([p.x, p.y, p.z])(tube)
         assembly = assembly + cyli if assembly else cyli
-        if postLabel:
+        if isTrue(postLabel):
             cName = colorSet['B']
             thik  = thickLet('t')
             zd    = levelLet('e')
@@ -231,7 +236,7 @@ def doCylinders(dz, LO, assembly):
             cName = colorSet[colorr]
             alpha = SF*endGap/L
             bx, by, bz = p.x+alpha*dx, p.y+alpha*dy, pz+alpha*dz
-            if cylList:
+            if isTrue(cylList):
                 print (f'Make  {cName:8} {thix} {m:2}{level1} {n:2}{level2}   Length {L:2.2f}')
             yAxisAngle = (pi/2 - asin(dz/L)) * 180/pi
             zAxisAngle =  atan2(dy, dx)      * 180/pi
@@ -260,9 +265,10 @@ def installParams(parTxt):
             if p in glob.keys():
                 t, v = type(glob[p]), q
                 try:
-                    if   t==int:   v = int(q);    ok=True
-                    elif t==float: v = float(q);  ok=True
-                    elif t==str:   v = q;         ok=True
+                    if   t==int:   v = int(q);     ok=True
+                    elif t==float: v = float(q);   ok=True
+                    elif t==bool:  v = isTrue(q);  ok=True
+                    elif t==str:   v = q;          ok=True
                 except:  pass
         if ok:
             glob[p] = v
@@ -286,17 +292,6 @@ def loadScriptFile(fiName):
                 elif mode==3: cs  = cs  + line
     installParams(pt)           # Install params, if any
     return Design(los, cs)      # Return Design
-
-# Return 2 values, ival and fval (integer and float), using defVal as
-# the result to return if not len(argv)>arn, and badCode as the result
-# to return if conversion fails.
-def getArg(arn, defVal, badCode):
-    if len(argv)>arn:
-        try:    ival = int(argv[arn])
-        except: ival = badCode
-        return ival
-    else: return defVal
-
 
 colors, levels = 'GYRBCMW',  'abcde'
 thixx,  digits = 'pqrstuvw', '01234356789'
