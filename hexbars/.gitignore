@@ -1,6 +1,7 @@
 ex
 ex/*
 *.jpg
+*.png
 *.pdf
 *.pyc
 *.scad
