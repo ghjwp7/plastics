@@ -9,24 +9,23 @@ command line) instead of 126 you will see some edges disappear in the
 outer ring of triangles, where some of the lengths are 125.14.
 
 The next several ranks of post separations in this example are 148.66,
-155.10, 159.01, 159.89 and 159.89 units apart.  For this example,
-autoTol values just below or above those values give different numbers
-of edges generated.  For example, autoTol=159 makes 215 edges and
-autoTol=159.1 makes 225, in obviously invalid triangulations.
+155.10, 159.01, and 159.89 units apart.  For this example, autoTol
+values just below or above those values give different numbers of
+edges generated.  For example, autoTol=159 makes 215 edges and
+autoTol=159.1 makes 225, both in obviously invalid triangulations.
 
-=P
-  postHi=0.08 pDiam=0.04 endGap=0
-  postList=f
-  cylList=f
-  
+=P  
+  autoList=t
+  autoTol=126  
 =  autoList controls whether automatically-generated edges get listed,
 =  and autoTol is how much extra length to allow generated edges to
 =  have, above the length of the longest specified edge, Lmax.
 =  (If autoTol is negative, generated edge lengths will have to be
 =  at least that much shorter than Lmax.)
   
-  autoList=t
-  autoTol=126
+  postHi=0.08 pDiam=0.04 endGap=0
+  postList=f
+  cylList=f
 =L
 B 0 0 .7;  C 0,0,0;
 = row 1,            posts 1 - 5
