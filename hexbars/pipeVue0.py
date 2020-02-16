@@ -76,6 +76,9 @@ def rotate2(a,b,theta):
     ct = cos(theta)
     return  a*ct-b*st, a*st+b*ct
 
+def ssq(x,y,z):    return x*x + y*y + z*z
+def sssq(x,y,z):   return sqrt(ssq(x,y,z))
+
 def produceOut(code, numText, LO):
     BP, posts = LO.BP, LO.posts
     bx, by, bz = BP.x, BP.y, BP.z
@@ -186,7 +189,8 @@ def doLayout(dz):
         p = Point(SF*p.x, SF*p.y, SF*p.z)
         posts[k] = p
         if isTrue(postList):
-            print (f'Post {k:<3}   ( {p.x:8.2f} {p.y:8.2f} {p.z:8.2f} )')
+            #print (f'Post {k:<3} ({p.x:8.2f}, {p.y:8.2f}, {p.z:8.2f} )')
+            print (f'p{k:<2}=Point( {p.x:8.2f}, {p.y:8.2f}, {p.z:8.2f})')
     assembly = None
     for k, p in enumerate(posts):
         tube = cylinder(d=SF*postDiam, h=SF*postHi)
@@ -207,11 +211,44 @@ def doLayout(dz):
     return assembly, Layout(LO.BP, posts)
 
 def doCylinders(dz, LO, assembly):
+    def oneCyl(listIt):   # Return a cylinder & its end-post #'s
+        m, n = int(post1)%nPosts, int(post2)%nPosts
+        p, q = posts[m], posts[n]
+        za1 = levelLet(level1)
+        za2 = levelLet(level2)
+        pz, qz = za1 + p.z, za2 + q.z
+        # p, q are scaled, so dx,dy,dz & L are too.
+        dz, dx, dy = qz-pz, q.x-p.x,  q.y-p.y
+        L = max(0.1, sssq(dx,  dy,  dz))
+        cName = colorSet[colorr]
+        alpha = SF*endGap/L     # endGap needs scaling
+        # Inputs are scaled, so cx, cy, cz are too.
+        cx, cy, cz = p.x+alpha*dx, p.y+alpha*dy, pz+alpha*dz
+        if isTrue(listIt):
+            print (f'Make  {cName:8} {thix} {m:2}{level1} {n:2}{level2}   Length {L:2.2f}')
+        yAxisAngle = (pi/2 - asin(dz/L)) * 180/pi
+        zAxisAngle =  atan2(dy, dx)      * 180/pi
+        diam = thickLet(thix)
+        tube = cylinder(d=diam, h=L-SF*2*endGap)
+        colo = color(cName)(tube)
+        tilt = rotate([0,yAxisAngle,zAxisAngle])(colo)
+        # Return a ready-to-use cylinder
+        return translate([cx,cy,cz])(tilt), m, n, L
+
+    def addEdge(v,w):
+        if v in edgeList:
+            if w not in edgeList[v]:
+                edgeList[v].append(w)
+        else:
+            edgeList[v] = [w]
+           
+
     specs, posts = dz.cSpec, LO.posts
     colorr='G'; thix='p'; pc = None
     post1, post2, level1, level2 = '0', '1', 'c','c'
     nPosts = len(posts)
     nonPost = True
+    edgeList, Lmax = {}, 0
     for cc in specs:
         if cc in colors: colorr = cc
         elif cc in thixx: thix  = cc
@@ -226,28 +263,34 @@ def doCylinders(dz, LO, assembly):
         elif cc==';':
             if nonPost:
                 post1, post2 = str(1+int(post1)), str(1+int(post2))
-            m, n = int(post1)%nPosts, int(post2)%nPosts
-            p, q = posts[m], posts[n]
-            za1 = levelLet(level1)
-            za2 = levelLet(level2)
-            pz, qz = za1 + p.z, za2 + q.z
-            dx, dy, dz  =  q.x-p.x,  q.y-p.y,  qz-pz
-            L = max(0.1, sqrt(dx*dx + dy*dy + dz*dz))
-            cName = colorSet[colorr]
-            alpha = SF*endGap/L
-            bx, by, bz = p.x+alpha*dx, p.y+alpha*dy, pz+alpha*dz
-            if isTrue(cylList):
-                print (f'Make  {cName:8} {thix} {m:2}{level1} {n:2}{level2}   Length {L:2.2f}')
-            yAxisAngle = (pi/2 - asin(dz/L)) * 180/pi
-            zAxisAngle =  atan2(dy, dx)      * 180/pi
-            diam = thickLet(thix)
-            tube = cylinder(d=diam, h=L-SF*2*endGap)
-            colo = color(cName)(tube)
-            tilt = rotate([0,yAxisAngle,zAxisAngle])(colo)
-            cyli = translate([bx,by,bz])(tilt)
+            cyli, p1, p2, L = oneCyl(cylList)
             assembly = assembly + cyli if assembly else cyli
+            Lmax = max(L, Lmax)
+            addEdge(p1, p2)  # Add edge to edges list
+            addEdge(p2, p1)
             nonPost = True
         pc = cc
+    # Finished with specs; now see if we need to auto-add cylinders
+    cutoff = Lmax + autoTol
+    if cutoff > 0:   # See if no way for any more edges
+        print (f'In auto-add, cutoff distance is {cutoff:7.2f} = Lmax + autoTol = {Lmax:0.2f} + {autoTol}')
+        cutoff2 = cutoff*cutoff
+        print (edgeList)
+        for pn in range(nPosts):
+            p = posts[pn]
+            for qn in range(1+pn, nPosts):
+                q = posts[qn]
+                dx, dy = p.x-q.x, p.y-q.y
+                #print (f'pn {pn}  qn {qn}   cutoff {cutoff:7.2f}  dx {dx:7.2f}  dy {dy:7.2f} ')
+                if abs(dx) > cutoff or abs(dy) > cutoff:
+                    continue
+                d2 = ssq(dx, dy, p.z-q.z)
+                #print (f'cutoff2 {cutoff2:7.2f}  d2 {d2:7.2f} ')
+                if d2 > cutoff2: continue
+                if pn not in edgeList or qn not in edgeList[pn]:
+                    post1, post2 = str(pn), str(qn)
+                    cyli, p1, p2, L = oneCyl(autoList)
+                    assembly = assembly + cyli if assembly else cyli
     return assembly
 
 def installParams(parTxt):
@@ -305,7 +348,7 @@ if __name__ == '__main__':
     version, paramTxt, postLabel= 0, '','Bte' # Blue, size u, level e
     scadFile = f'pipeVue{version}.scad' # Name of scad output file
     postList = cylList = False # Control printing of post and cyl data
-
+    autoTol, autoList = -1e9, False
     for k in range(1,len(argv)):
         paramTxt = paramTxt + ' ' + argv[k]
     installParams(paramTxt)     # Set params from command line
